@@ -13,6 +13,7 @@
 *.a
 *.la
 *.lo
+.libs
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -31,3 +32,32 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Various other standard files
+*~
+
+# Autoconf
+Makefile
+Makefile.in
+config.status
+config.nice
+config.log
+libtool
+.deps/
+.dirstamp
+aclocal.m4
+autom4te.cache
+configure
+TAGS
+
+build/_aux/
+build/libtool.m4
+build/ltoptions.m4
+build/ltsugar.m4
+build/ltversion.m4
+build/lt~obsolete.m4
+
+src/include/stamp-h1
+src/include/key_config.h
+
+cmd/key-cmd
