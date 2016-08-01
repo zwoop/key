@@ -22,7 +22,7 @@ AM_CFLAGS = -I$(top_srcdir)/include
 
 bin_PROGRAMS = key-cmd
 
-key_cmd _SOURCES = key-cmd.c
+key_cmd_SOURCES = key-cmd.c
 
 key_cmd_LDADD = \
-  $(top_builddir)/src/libkey.la
+	$(top_builddir)/src/libkey.la
