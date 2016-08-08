@@ -1,7 +1,8 @@
 /** @file
 
-    The parsing and factory APIs, for parsing and creating the underlying
-    parameter types for later evaluations.
+    Include file for the Arena object and linked list manager.
+    Note: This is not a generic memory arena manager, it's specific
+    just for holding one or more Key evaluator objects.
 
     @section license License
 
@@ -24,21 +25,23 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+#include "http/key.h"
 #include "include/key_config.h"
-#include <http/key.h>
 
+/* ToDo: This might be x64 specific? But regardless, hardcoded to 16 byte alignments for now. */
+#define KEY_ARENA_ALIGN(p) (((p) + (16 - 1L)) & ~(16 - 1L))
+
+/* Thsi holds an arena, which is a sequence of Key parameter objects and strings */
 typedef struct {
-    void *memory;
-    size_t pos;
     key_t *key;
     size_t size;
-    void *first_obj;
+    size_t pos;
 } key_arena_t;
 
 key_arena_t *key_arena_create(key_t *key, size_t size);
+void key_arena_destroy(key_arena_t *arena);
 
 void *key_arena_allocate(key_arena_t *arena, size_t size);
-void *key_arena_memdup(key_arena_t *arena, void *src, size_t size);
 
 #endif /* ARENA_H */
 

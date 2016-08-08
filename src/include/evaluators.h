@@ -23,6 +23,8 @@
 #ifndef EVALUATORS_H
 #define EVALUATORS_H
 
+#include "include/key_config.h"
+
 typedef int(key_evaluator_t)(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
 
 extern int key_eval_div(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);

@@ -48,17 +48,18 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_AWK
 AC_PROG_SED
 AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
-AC_CHECK_PROG(RM, rm, rm)
-AC_CHECK_PROG(ASCPP, cpp, cpp)
-AC_CHECK_TOOL(AR, ar, ar)
-AC_ISC_POSIX
+AC_PROG_RANLIB
 
 TS_ADDTO(CFLAGS, [-std=c11])
+TS_ADDTO(CFLAGS, [-pedantic])
+TS_ADDTO(CFLAGS, [-Wall])
+# TS_ADDTO(CFLAGS, [-Werror])
 
 # Checks for libraries.
 
@@ -66,6 +67,7 @@ TS_ADDTO(CFLAGS, [-std=c11])
 AC_CHECK_HEADERS([stddef.h stdint.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 AC_TYPE_UINT64_T
 
@@ -73,12 +75,14 @@ AC_TYPE_UINT64_T
 AC_FUNC_MALLOC
 
 # Genereated files
-AC_CONFIG_FILES([Makefile src/Makefile cmd/Makefile])
+AC_CONFIG_FILES([Makefile
+                 cmd/Makefile
+                 src/Makefile])
 
 # End
 AC_OUTPUT
 
-
+# Produce a brief summary of how this build is being performed
 AC_MSG_NOTICE([Build option summary:
     CC:                 $CC
     CFLAGS:             $CFLAGS

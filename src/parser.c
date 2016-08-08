@@ -24,10 +24,14 @@
 */
 #include "include/parser.h"
 
+#include <assert.h>
+#include <stdbool.h>
+
 #if HAVE_STRING_H
 #include <string.h>
 #endif
 
+/* These are the template structures for each of the supported parameter evaluator types */
 static const key_param_div_t g_div = {
     .c.type = KEY_PARAM_DIV,
     .c.evaluator = &key_eval_div,
@@ -77,6 +81,23 @@ static const key_param_param_t g_param = {
     .param_len = 0,
 };
 
+/* Copy a header into the common section of a parameter struct, using the provided arena for memory */
+static bool
+dupe_common_header(key_arena_t *arena, key_common_t *c, const char* header, size_t header_len)
+{
+    void *ptr = key_arena_allocate(arena, header_len);
+
+    if (ptr) {
+        memcpy(ptr, header, header_len);
+        c->header = (const char*)ptr;
+        c->header_len = header_len;
+
+        return true;
+    }
+
+    return false;
+}
+
 /* This is the main factory for creating new objects. */
 void *
 key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size_t header_len)
@@ -87,8 +108,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_div, sizeof(g_div));
-                if ((p->c.header = (const char*)key_arena_memdup(arena, (void*)header, header_len))) {
-                    p->c.header_len = header_len;
+                if (dupe_common_header(arena, &p->c, header, header_len)) {
                     return (void *)p;
                 }
             }
@@ -99,8 +119,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_partition, sizeof(g_partition));
-                if ((p->c.header = (const char*)key_arena_memdup(arena, (void*)header, header_len))) {
-                    p->c.header_len = header_len;
+                if (dupe_common_header(arena, &p->c, header, header_len)) {
                     return (void *)p;
                 }
             }
@@ -111,8 +130,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_match, sizeof(g_match));
-                if ((p->c.header = (const char*)key_arena_memdup(arena, (void*)header, header_len))) {
-                    p->c.header_len = header_len;
+                if (dupe_common_header(arena, &p->c, header, header_len)) {
                     return (void *)p;
                 }
             }
@@ -123,8 +141,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_substr, sizeof(g_substr));
-                if ((p->c.header = (const char*)key_arena_memdup(arena, (void*)header, header_len))) {
-                    p->c.header_len = header_len;
+                if (dupe_common_header(arena, &p->c, header, header_len)) {
                     return (void *)p;
                 }
             }
@@ -135,8 +152,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_param, sizeof(g_param));
-                if ((p->c.header = (const char*)key_arena_memdup(arena, (void*)header, header_len))) {
-                    p->c.header_len = header_len;
+                if (dupe_common_header(arena, &p->c, header, header_len)) {
                     return (void *)p;
                 }
             }

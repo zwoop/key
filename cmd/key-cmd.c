@@ -1,8 +1,9 @@
 /** @file
 
-    We create a template instance of each of the possible parameter evaluation
-    struct's. This allows us for quick initialization with a simple memcpy().
-    This is a factory "class", used to create new instances of these structs.
+    Simple command line utility to test and validate various Key
+    header strings, showing how the parser handled the header. This
+    is used as part of regression tests, but can also be useful when
+    debugging and testing the Key header properties in general.
 
     @section license License
 

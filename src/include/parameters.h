@@ -24,8 +24,8 @@
 #ifndef KEY_PARAMETERS_H
 #define KEY_PARAMETERS_H
 
-#include <http/key.h>
-
+#include "http/key.h"
+#include "include/key_config.h"
 #include "include/evaluators.h"
 
 typedef enum {

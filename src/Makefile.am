@@ -23,4 +23,4 @@ AM_CFLAGS = -I$(top_srcdir)/include
 lib_LTLIBRARIES = libkey.la
 
 libkey_la_LDFLAGS = -no-undefined -version-info @KEY_LIBTOOL_VERSION@
-libkey_la_SOURCES = evaluators.c parser.c arena.c
+libkey_la_SOURCES = arena.c evaluators.c key.c parser.c 

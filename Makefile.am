@@ -26,6 +26,6 @@ library_include_HEADERS = include/http/key.h
 .PHONY: clang-format
 
 clang-format:
-	@clang-format -i include/http/*.h
-	@clang-format -i src/include/*.[c,h]
-	@clang-format -i cmd/*.[c,h]
+	clang-format -i include/http/*.h
+	clang-format -i src/include/*.[c,h]
+	clang-format -i cmd/*.[c,h]

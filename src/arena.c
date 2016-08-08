@@ -1,8 +1,9 @@
 /** @file
 
-    We create a template instance of each of the possible parameter evaluation
-    struct's. This allows us for quick initialization with a simple memcpy().
-    This is a factory "class", used to create new instances of these structs.
+    The arena structure is an efficient wrapper around both memory
+    allocation, each arena holding a linked list of Key parameter
+    evaluators. This means this Arena is not a generic memory allocator,
+    it's specific to hold one or more Key parameters only.
 
     @section license License
 
@@ -24,29 +25,37 @@
 */
 #include "include/arena.h"
 
-#if HAVE_STRING_H
-#include <string.h>
-#endif
+#include <assert.h>
 
-#define ALIGN(p) (((p) + (16-1L)) & ~(16-1L))
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 key_arena_t*
 key_arena_create(key_t *key, size_t size)
 {
-    void *memory = key->malloc(size);
-    key_arena_t *arena = (key_arena_t *)memory;
+    if (key) {
+        key_arena_t *arena = (key_arena_t *)key->malloc(size);
 
-    arena->memory = memory;
-    arena->key = key;
-    arena->size = size;
-    arena->pos = ALIGN(sizeof(key_arena_t));
+        if (!arena) {
+            abort();
+        }
+        arena->key = key;
+        arena->size = size;
+        arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
 
-    return arena;
+        return arena;
+    }
+
+    assert(!"Must provide a Key object (key_t*) for the Arena");
 }
 
 void
 key_arena_destroy(key_arena_t *arena)
 {
+    assert(arena);
+    assert(arena->key);
+
     arena->key->free(arena);
 }
 
@@ -54,24 +63,12 @@ void*
 key_arena_allocate(key_arena_t *arena, size_t size)
 {
     if (size <= (arena->pos - arena->size)) {
-        void *memory = (void*)(arena->memory + arena->pos);
+        void *memory = (void*)(arena + arena->pos);
 
-        arena->pos = ALIGN(arena->pos + size);
+        arena->pos = KEY_ARENA_ALIGN(arena->pos + size);
         return memory;
     }
     return NULL;
-}
-
-void *
-key_arena_memdup(key_arena_t *arena, void *src, size_t size)
-{
-    void *ptr = key_arena_allocate(arena, size);
-
-    if (ptr) {
-        memcpy(ptr, src, size);
-    }
-
-    return ptr;
 }
 
 /*
