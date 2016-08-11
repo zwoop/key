@@ -20,7 +20,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_CFLAGS = -I$(top_srcdir)/include
 
-lib_LTLIBRARIES = libkey.la
+lib_LTLIBRARIES = libhttp_key.la
 
-libkey_la_LDFLAGS = -no-undefined -version-info @KEY_LIBTOOL_VERSION@
-libkey_la_SOURCES = arena.c evaluators.c key.c parser.c 
+libhttp_key_la_LDFLAGS = -no-undefined -version-info @KEY_LIBTOOL_VERSION@
+libhttp_key_la_SOURCES = arena.c evaluators.c key.c parser.c 

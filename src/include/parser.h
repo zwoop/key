@@ -24,7 +24,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "include/key_config.h"
 #include "include/parameters.h"
 #include "include/arena.h"
 

@@ -26,7 +26,8 @@
 #define ARENA_H
 
 #include "http/key.h"
-#include "include/key_config.h"
+
+#include "include/platform.h"
 
 /* ToDo: This might be x64 specific? But regardless, hardcoded to 16 byte alignments for now. */
 #define KEY_ARENA_ALIGN(p) (((p) + (16 - 1L)) & ~(16 - 1L))

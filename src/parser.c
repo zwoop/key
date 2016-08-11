@@ -22,10 +22,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
+#include <assert.h>
+
 #include "include/parser.h"
 
-#include <assert.h>
+#if HAVE__BOOL
 #include <stdbool.h>
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>

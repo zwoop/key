@@ -18,11 +18,12 @@
 #  limitations under the License.
 
 ACLOCAL_AMFLAGS = -I m4
-AM_CFLAGS = -I$(top_srcdir)/include
+
+AM_CFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src
 
 bin_PROGRAMS = key-cmd
 
 key_cmd_SOURCES = key-cmd.c
 
 key_cmd_LDADD = \
-	$(top_builddir)/src/libkey.la
+	$(top_builddir)/src/libhttp_key.la

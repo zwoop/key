@@ -25,8 +25,13 @@
 #define KEY_PARAMETERS_H
 
 #include "http/key.h"
-#include "include/key_config.h"
+
+#include "include/platform.h"
 #include "include/evaluators.h"
+
+#if HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
 typedef enum {
     KEY_PARAM_DIV,

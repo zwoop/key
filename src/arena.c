@@ -23,9 +23,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-#include "include/arena.h"
-
 #include <assert.h>
+
+#include "include/arena.h"
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -37,14 +37,14 @@ key_arena_create(key_t *key, size_t size)
     if (key) {
         key_arena_t *arena = (key_arena_t *)key->malloc(size);
 
-        if (!arena) {
-            abort();
-        }
-        arena->key = key;
-        arena->size = size;
-        arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
+        if (arena) {
+            arena->key = key;
+            arena->size = size;
+            arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
 
-        return arena;
+            return arena;
+        }
+        return NULL; /* Out of memory, the caller has to decide what to do */
     }
 
     assert(!"Must provide a Key object (key_t*) for the Arena");

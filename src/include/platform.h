@@ -1,6 +1,6 @@
 /** @file
 
-    Include file for all the various parameter evaluators.
+    Basic include file for various platform specific details.
 
     @section license License
 
@@ -20,20 +20,30 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-#ifndef EVALUATORS_H
-#define EVALUATORS_H
+#ifndef KEY_PLATFORM_H
+#define KEY_PLATFORM_H
 
-#include "include/platform.h"
+#include "include/key_config.h"
 
-typedef int(key_evaluator_t)(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
+#if HAVE_MEMSET
+#define key_memset memset
+#else
+#error Need memset(), file a ticket for this platform!
+#endif
 
-extern int key_eval_div(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-extern int key_eval_partition(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-extern int key_eval_match(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-extern int key_eval_substr(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-extern int key_eval_param(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
+#if HAVE_STRCHR
+#define key_strchr strchr
+#else
+#error Need strchr(), file a ticket for this platform!
+#endif
 
-#endif /* EVALUATORS_H */
+#if HAVE_STRDUP
+#define key_strdup strdup
+#else
+#error Need strdup(), file a ticket for this platform!
+#endif
+
+#endif /* KEY_PLATFORM_H */
 
 /*
   local variables:

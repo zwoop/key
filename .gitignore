@@ -49,6 +49,8 @@ aclocal.m4
 autom4te.cache
 configure
 TAGS
+autoscan.log
+configure.scan
 
 build/_aux/
 build/libtool.m4

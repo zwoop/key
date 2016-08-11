@@ -23,10 +23,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-#include "include/arena.h"
+#include <assert.h>
 #include "http/key.h"
 
-#include <assert.h>
+#include "include/arena.h"
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -37,15 +37,22 @@
 #endif
 
 /* Initialize a Key object. This must be called before usage. */
-void
+key_t *
 key_init(key_t *key, key_header_t get_header, key_malloc_t *mem_alloc, key_free_t *mem_free, size_t arena_size,
          key_cache_store_t *cache_store, key_cache_lookup_t *cache_lookup, void *cache_data)
 {
-    assert(key);
+    key_malloc_t *allocator = mem_alloc ? mem_alloc : &malloc;
+
     assert(get_header);
+    
+    if (!key) {
+        if (!(key = (key_t*)allocator(sizeof(key_t)))) {
+            return NULL;
+        }
+    }
 
     key->get_header = get_header;
-    key->malloc = mem_alloc ? mem_alloc : &malloc;
+    key->malloc = allocator;
     key->free = mem_free ? mem_free : &free;
     key->arena_size = arena_size >= KEY_MIN_ARENA ? arena_size : KEY_MIN_ARENA;
 
@@ -55,11 +62,22 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t *mem_alloc, key_free_
         assert(cache_store);
         assert(cache_lookup);
         assert(cache_data);
+
         key->cache.store = cache_store;
         key->cache.lookup = cache_lookup;
         key->cache.data = cache_data;
     } else {
-        memset(&key->cache, 0, sizeof(key->cache));
+        key_memset(&key->cache, 0, sizeof(key->cache));
+    }
+
+    return key;
+}
+
+void
+key_release(key_t *key)
+{
+    if (key) {
+        key->free(key);
     }
 }
 
@@ -69,8 +87,9 @@ key_release_params(key_t *key, key_params_t *params)
     assert(key);
     assert(params);
 
-    /* The first object pointer is the first value in the arena, so the start of the arena can be
-       calculated from this. Yes, slightly ugly, but avoid wasting 8 bytes in every parameter object */
+    /* The first Key parameter object is the first value in the arena, right after the arena object itself,
+       so the start of the arena can be calculated from this. Yes, slightly ugly, but avoid wasting 8 bytes
+       in every parameter object, or another struct object to manage the two. */
     key_arena_destroy((key_arena_t *)(params - KEY_ARENA_ALIGN(sizeof(key_arena_t))));
 }
 

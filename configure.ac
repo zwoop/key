@@ -64,7 +64,7 @@ TS_ADDTO(CFLAGS, [-Wall])
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([stddef.h stdint.h string.h])
+AC_CHECK_HEADERS([stddef.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -73,6 +73,9 @@ AC_TYPE_UINT64_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
+AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([strchr])
+AC_CHECK_FUNCS([strdup])
 
 # Genereated files
 AC_CONFIG_FILES([Makefile
