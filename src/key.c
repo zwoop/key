@@ -107,7 +107,8 @@ key_parse(key_t *key, const char *key_string, size_t header_len, key_params_t *p
     if ((arena = key_arena_create(key))) {
         key_common_t* param;
 
-        param = key_factory(arena, KEY_PARAM_SUBSTR, "accept-encoding", 0);
+        /* ToDo: This is obviously just made up, but testing the factory now */
+        param = key_factory(arena, "substr", 6, "accept-encoding", 0);
         if (param) {
             key_param_substr_t *substr = (key_param_substr_t *)param;
 
@@ -133,11 +134,24 @@ key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t b
         const char* value = key->get_header(header_data, param->header, param->header_len, &val_len);
 
         if (value && (val_len > 0)) {
-            int len = param->evaluator(param, value, val_len, buf, pos, buf_size);
+            if (pos < buf_size) { /* Room for at least one digit, no need to check those */
+                int len = param->evaluator(param, value, val_len, buf, pos, buf_size);
 
-            pos += len;
-            param = param->next;
+                pos += len;
+            } else {
+                /* ToDo: Deal with buffer error */
+                break;
+            }
+        } else {
+            if ((buf_size - pos) >= 4) {
+                memcpy(buf + pos, "none", 4);
+                pos += 4;
+            } else {
+                /* ToDo: Deal with errors? */
+                break;
+            }
         }
+        param = param->next;
     }
 
     return pos;

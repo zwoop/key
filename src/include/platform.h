@@ -43,6 +43,12 @@
 #error Need strdup(), file a ticket for this platform!
 #endif
 
+#if HAVE_STRNCASECMP
+#define key_strncasecmp strncasecmp
+#else
+#error Need strncasecmp(), file a ticket for this platform!
+#endif
+
 #endif /* KEY_PLATFORM_H */
 
 /*

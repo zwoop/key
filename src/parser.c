@@ -35,6 +35,10 @@
 #include <string.h>
 #endif
 
+#if HAVE_STRINGS_H
+#include <strings.h>
+#endif
+
 /* These are the template structures for each of the supported parameter evaluator types */
 static const key_param_div_t g_div = {
     .c.type = KEY_PARAM_DIV,
@@ -92,59 +96,76 @@ static const key_param_param_t g_param = {
 
 /* This is the main factory for creating new objects. */
 key_common_t *
-key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size_t header_len)
+key_factory(key_arena_t *arena, const char* type, size_t type_len, const char *header, size_t header_len)
 {
     key_common_t *param = NULL;
 
     if (0 == header_len) {
         header_len = strlen(header);
     }
+    if (0 == type_len) {
+        type_len = strlen(type);
+    }
 
-    switch (type) {
-        case KEY_PARAM_DIV: {
+    switch (type_len) {
+    case 3: /* DIV */
+        if (!key_strncasecmp(type, "div", 3)) {
             key_param_div_t *p = (key_param_div_t *)key_arena_allocate(arena, sizeof(key_param_div_t));
 
             if (p) {
                 memcpy(p, &g_div, sizeof(g_div));
                 param = &p->c;
             }
-        } break;
-
-        case KEY_PARAM_PARTITION: {
+        }
+        break;
+    case 9: /* PARTITION */
+        if (!key_strncasecmp(type, "partition", 9)) {
             key_param_partition_t *p = (key_param_partition_t*)key_arena_allocate(arena, sizeof(key_param_partition_t));
 
             if (p) {
                 memcpy(p, &g_partition, sizeof(g_partition));
                 param = &p->c;
             }
-        } break;
+        }
+        break;
+    case 5: /* MATCH and PARAM */
+        switch (*type) {
+        case 'm':
+        case 'M':
+            if (!key_strncasecmp(type, "match", 5)) {
+                key_param_match_t *p = (key_param_match_t *)key_arena_allocate(arena, sizeof(key_param_match_t));
 
-        case KEY_PARAM_MATCH: {
-            key_param_match_t *p = (key_param_match_t *)key_arena_allocate(arena, sizeof(key_param_match_t));
-
-            if (p) {
-                memcpy(p, &g_match, sizeof(g_match));
-                param = &p->c;
+                if (p) {
+                    memcpy(p, &g_match, sizeof(g_match));
+                    param = &p->c;
+                }
             }
-        } break;
+            break;
+        case 'p':
+        case 'P':
+            if (!key_strncasecmp(type, "param", 5)) {
+                key_param_param_t *p = (key_param_param_t *)key_arena_allocate(arena, sizeof(key_param_param_t));
 
-        case KEY_PARAM_SUBSTR: {
+                if (p) {
+                    memcpy(p, &g_param, sizeof(g_param));
+                    param = &p->c;
+                }
+            }
+            break;
+        }
+        break;
+    case 6: /* SUBSTR */
+        if (!key_strncasecmp(type, "substr", 6)) {
             key_param_substr_t *p = (key_param_substr_t *)key_arena_allocate(arena, sizeof(key_param_substr_t));
 
             if (p) {
                 memcpy(p, &g_substr, sizeof(g_substr));
                 param = &p->c;
             }
-        } break;
-
-        case KEY_PARAM_PARAM: {
-            key_param_param_t *p = (key_param_param_t *)key_arena_allocate(arena, sizeof(key_param_param_t));
-
-            if (p) {
-                memcpy(p, &g_param, sizeof(g_param));
-                param = &p->c;
-            }
-        } break;
+        }
+        break;
+    default: /* Unknown */
+        break;
     }
 
     /* Dup the header string unto the arena */
@@ -161,7 +182,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
         }
     }
 
-    return NULL; /* Likely memory allocation (arena) failed, deal with it. */
+    return NULL; /* Could be memory allocation issue, *or* a bad string, we don't really care. */
 }
 
 /*

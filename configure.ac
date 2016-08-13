@@ -76,6 +76,7 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memset])
 AC_CHECK_FUNCS([strchr])
 AC_CHECK_FUNCS([strdup])
+AC_CHECK_FUNCS([strncasecmp])
 
 # Genereated files
 AC_CONFIG_FILES([Makefile
