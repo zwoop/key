@@ -24,6 +24,7 @@
     limitations under the License.
 */
 #include <assert.h>
+#include <stdio.h> /* ToDo: Remove? */
 
 #include "include/arena.h"
 
@@ -32,14 +33,14 @@
 #endif
 
 key_arena_t*
-key_arena_create(key_t *key, size_t size)
+key_arena_create(key_t *key)
 {
     if (key) {
-        key_arena_t *arena = (key_arena_t *)key->malloc(size);
+        key_arena_t *arena = (key_arena_t *)key->malloc(key->arena_size);
 
         if (arena) {
-            arena->key = key;
-            arena->size = size;
+            /* printf("Created ARENA is %p\n", (void*)arena); */
+            arena->size = key->arena_size;
             arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
 
             return arena;
@@ -51,19 +52,20 @@ key_arena_create(key_t *key, size_t size)
 }
 
 void
-key_arena_destroy(key_arena_t *arena)
+key_arena_destroy(key_t *key, key_arena_t *arena)
 {
+    assert(key);
     assert(arena);
-    assert(arena->key);
 
-    arena->key->free(arena);
+    /* printf("Destroy ARENA is %p\n", (void*)arena); */
+    key->free(arena);
 }
 
 void*
 key_arena_allocate(key_arena_t *arena, size_t size)
 {
     if (size <= (arena->pos - arena->size)) {
-        void *memory = (void*)(arena + arena->pos);
+        void *memory = (void*)((unsigned char*)arena + arena->pos);
 
         arena->pos = KEY_ARENA_ALIGN(arena->pos + size);
         return memory;

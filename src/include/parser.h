@@ -27,7 +27,7 @@
 #include "include/parameters.h"
 #include "include/arena.h"
 
-extern void *key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size_t header_len);
+key_common_t *key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size_t header_len);
 
 #endif /* PARSER_H */
 

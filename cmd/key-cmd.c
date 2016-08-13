@@ -47,10 +47,17 @@
 
 #define KEY_HASH_SIZE 8192 /* Arbitrary number of headers */
 
-/* Some globals. Sue me, this is just a demo / test tool */
-key_t *g_key;
+/* Produce help text, from command line parsing etc. */
+static void
+help()
+{
+    fprintf(stderr, "Usage: key-cmd [-H header] [-h] <Key string> ...\n");
+    fprintf(stderr, "\t-H <header>	Set the header (e.g. 'Accept-Encoding: gzip')\n");
+    exit(0);
+}
 
-const char *
+/* Retrieve a header from the hash, this is not particularly efficient, but it's a demo / test tool. */
+static const char *
 get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 {
     ENTRY item;
@@ -58,41 +65,13 @@ get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 
     item.key = (char *)header;
     if ((found_item = hsearch(item, FIND)) != NULL) {
+        *value_len = strlen((const char *)found_item->data);
         return (const char *)found_item->data;
     }
 
+    *value_len = 0;
+
     return NULL;
-}
-
-static void
-init(void)
-{
-    g_key = key_init(NULL,        /* Have it allocate memory for us, using the allocator */
-                     &get_header, /* Header function */
-                     NULL,        /* Use system malloc */
-                     NULL,        /* Use system free */
-                     4096,        /* Arbitrary arena size, which also dictates roughly the size of Key */
-                     NULL,        /* No cache store */
-                     NULL,        /* No cache lookup */
-                     NULL         /* No cache data */
-                     );
-    assert(g_key);
-}
-
-static void
-cleanup(void)
-{
-    if (g_key) {
-        key_release(g_key); /* Only release memory that was allocated by the Key allocator!!! */
-    }
-}
-
-static void
-help()
-{
-    fprintf(stderr, "Usage: key-cmd [-H header] [-h] <Key string> ...\n");
-    fprintf(stderr, "\t-H <header>	Set the header (e.g. 'Accept-Encoding: gzip')\n");
-    exit(0);
 }
 
 static void
@@ -108,7 +87,13 @@ add_header(const char *h)
         }
         if (*sep) {
             ENTRY item;
+            char *h = header;
 
+            /* Store the header value in all lower-case */
+            while (*h) {
+                *h = tolower(*h);
+                ++h;
+            }
             item.key = header;
             item.data = sep;
             (void)hsearch(item, ENTER);
@@ -126,12 +111,28 @@ add_header(const char *h)
 int
 main(int argc, const char *argv[])
 {
+    key_t key;
+    int i;
+
+    /* getopt() options */
     static const struct option longopt[] = {
         {(char *)"header", required_argument, NULL, 'H'}, {(char *)"help", no_argument, NULL, 'h'}, {NULL, no_argument, NULL, '\0'},
     };
 
-    /* Parse the command line arguments */
+    /* Setup the main key object */
+    key_init(&key, &get_header, /* Header function */
+             NULL,              /* Use system malloc */
+             NULL,              /* Use system free */
+             4096,              /* Arbitrary arena size, which also dictates roughly the size of Key */
+             NULL,              /* No cache store */
+             NULL,              /* No cache lookup */
+             NULL               /* No cache data */
+             );
+
+    /* We use the posix hash table for the header lookups */
     hcreate(KEY_HASH_SIZE);
+
+    /* Parse the command line arguments */
     while (1) {
         int opt = getopt_long(argc, (char *const *)argv, "hH:", longopt, NULL);
 
@@ -149,11 +150,36 @@ main(int argc, const char *argv[])
         }
     }
 
-    init();
+    argc -= optind;
+    argv += optind;
 
-    cleanup();
+    /* ToDo: It'd be neat to have a way to do e.g.
 
-    hdestroy();
+       curl -s -D - -o /dev/null https://example.com | key-cmd "accept-encoding;substr=gzip".
+
+       -- or --
+
+       key-cmd -u https://example.com "accept-encoding;substr=gzip".
+    */
+
+    /* Loop over the remaining arguments, and parse those as if they were Key: headers */
+    for (i = 0; i < argc; ++i) {
+        key_params_t params;
+        size_t num_params;
+        char buf[8192];
+
+        if (KEY_PARSE_OK == key_parse(&key, argv[i], strlen(argv[i]), &params, &num_params)) {
+            int len = key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
+
+            printf("\tKey: %s -> \"%.*s\"\n", argv[i], len, buf);
+            key_release_params(&key, params);
+        } else {
+            /* ToDo: Parse failure */
+        }
+    }
+
+    /* No need to release our Key object, since it's on the stack. */
+    hdestroy(); /* Destroy the posix hash table */
 
     return 0;
 }

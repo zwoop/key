@@ -25,6 +25,7 @@
 #include <assert.h>
 
 #include "include/parser.h"
+#include "include/evaluators.h"
 
 #if HAVE__BOOL
 #include <stdbool.h>
@@ -41,6 +42,7 @@ static const key_param_div_t g_div = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "DIV",
+    .c.next = NULL,
     .divider = 0,
 };
 
@@ -50,6 +52,7 @@ static const key_param_partition_t g_partition = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "PARTITION",
+    .c.next = NULL,
     .partitions = {0},
     .num_partitions = 0,
 };
@@ -60,6 +63,7 @@ static const key_param_match_t g_match = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "MATCH",
+    .c.next = NULL,
     .match = NULL,
     .match_len = 0,
 };
@@ -70,6 +74,7 @@ static const key_param_substr_t g_substr = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "SUBSTR",
+    .c.next = NULL,
     .substr = NULL,
     .substr_len = 0,
 };
@@ -80,40 +85,28 @@ static const key_param_param_t g_param = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "param",
+    .c.next = NULL,
     .param = NULL,
     .param_len = 0,
 };
 
-/* Copy a header into the common section of a parameter struct, using the provided arena for memory */
-static bool
-dupe_common_header(key_arena_t *arena, key_common_t *c, const char* header, size_t header_len)
-{
-    void *ptr = key_arena_allocate(arena, header_len);
-
-    if (ptr) {
-        memcpy(ptr, header, header_len);
-        c->header = (const char*)ptr;
-        c->header_len = header_len;
-
-        return true;
-    }
-
-    return false;
-}
-
 /* This is the main factory for creating new objects. */
-void *
+key_common_t *
 key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size_t header_len)
 {
+    key_common_t *param = NULL;
+
+    if (0 == header_len) {
+        header_len = strlen(header);
+    }
+
     switch (type) {
         case KEY_PARAM_DIV: {
             key_param_div_t *p = (key_param_div_t *)key_arena_allocate(arena, sizeof(key_param_div_t));
 
             if (p) {
                 memcpy(p, &g_div, sizeof(g_div));
-                if (dupe_common_header(arena, &p->c, header, header_len)) {
-                    return (void *)p;
-                }
+                param = &p->c;
             }
         } break;
 
@@ -122,9 +115,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_partition, sizeof(g_partition));
-                if (dupe_common_header(arena, &p->c, header, header_len)) {
-                    return (void *)p;
-                }
+                param = &p->c;
             }
         } break;
 
@@ -133,9 +124,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_match, sizeof(g_match));
-                if (dupe_common_header(arena, &p->c, header, header_len)) {
-                    return (void *)p;
-                }
+                param = &p->c;
             }
         } break;
 
@@ -144,9 +133,7 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_substr, sizeof(g_substr));
-                if (dupe_common_header(arena, &p->c, header, header_len)) {
-                    return (void *)p;
-                }
+                param = &p->c;
             }
         } break;
 
@@ -155,11 +142,23 @@ key_factory(key_arena_t *arena, key_param_types_t type, const char *header, size
 
             if (p) {
                 memcpy(p, &g_param, sizeof(g_param));
-                if (dupe_common_header(arena, &p->c, header, header_len)) {
-                    return (void *)p;
-                }
+                param = &p->c;
             }
         } break;
+    }
+
+    /* Dup the header string unto the arena */
+    if (param) {
+        void *hdr = key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
+
+        if (hdr) {
+            memcpy(hdr, header, header_len);
+            *((char*)hdr + header_len) = '\0';
+            param->header = (const char*)hdr;
+            param->header_len = header_len;
+
+            return param; /* We can always cast this back to the right type, based on the parameter type */
+        }
     }
 
     return NULL; /* Likely memory allocation (arena) failed, deal with it. */

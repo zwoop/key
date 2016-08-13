@@ -35,11 +35,9 @@ extern "C" {
 #define KEY_MAX_PARTITIONS 32
 #define KEY_MIN_ARENA 128
 
-/* Holds one single key parameter "rule", but it's also a linked list. */
-typedef struct _key_params {
-    void *param;
-    struct _key_params *next;
-} key_params_t;
+/* Holds one single key parameter "rule", which is opaque in the public APIs. This does hold
+   all the information necessary for a single parameter rule, but you must not modify it directly. */
+typedef struct _key_params *key_params_t;
 
 /**
  * @brief Callback function, for retrieving a header value, managing memory and a lookup cache.
@@ -47,42 +45,43 @@ typedef struct _key_params {
  * This is a prototype declaration, for declaring the callback need to retrieve a header value,
  * manage various aspects of memory, as well as the optional parser cache.
  */
-typedef const char *(key_header_t)(void *, const char *, size_t, size_t *);
-typedef void *(key_malloc_t)(size_t);
-typedef void(key_free_t)(void *);
+typedef const char *(*key_header_t)(void *, const char *, size_t, size_t *);
+typedef void *(*key_malloc_t)(size_t);
+typedef void (*key_free_t)(void *);
 
-typedef void(key_cache_store_t)(void *, const char *, size_t, key_params_t *);
-typedef const key_params_t *(key_cache_lookup_t)(void *, const char *, size_t);
+typedef void (*key_cache_store_t)(void *, const char *, size_t, key_params_t);
+typedef const key_params_t (*key_cache_lookup_t)(void *, const char *, size_t);
 
 typedef struct {
-    key_header_t *get_header;
-    key_malloc_t *malloc;
-    key_free_t *free;
+    key_header_t get_header;
+    key_malloc_t malloc;
+    key_free_t free;
     size_t arena_size;
 
     /* These are optional */
     struct {
-        key_cache_store_t *store;
-        key_cache_lookup_t *lookup;
+        key_cache_store_t store;
+        key_cache_lookup_t lookup;
         void *data;
     } cache;
 } key_t;
 
 typedef enum {
     KEY_PARSE_OK,
-    KEY_PARSE_FAIL,
-} key_parse_t;
+    KEY_PARSE_ERROR,
+} key_parse_status;
 
 /* Public interfaces */
-key_t *key_init(key_t *key, key_header_t *get_header, key_malloc_t *mem_alloc, key_free_t *mem_free, size_t arena_size,
-                key_cache_store_t *cache_store, key_cache_lookup_t *cache_lookup, void *cache_data);
+key_t *key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t mem_free, size_t arena_size,
+                key_cache_store_t cache_store, key_cache_lookup_t cache_lookup, void *cache_data);
 void key_release(key_t *key);
 
-key_parse_t key_parse(key_t *key, void *, key_params_t **params, size_t *num_params);
-key_parse_t key_parse_string(key_t *key, const char *header, size_t header_len, key_params_t **params, size_t *num_params);
-int key_eval(key_t *key, void *, key_params_t *params, char *buf, size_t buf_size);
+key_parse_status key_parse(key_t *key, const char *key_string, size_t header_len, key_params_t *params, size_t *num_params);
+key_parse_status key_parse_header(key_t *key, void *, key_params_t *params, size_t *num_params);
 
-void key_release_params(key_t *key, key_params_t *params);
+int key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size);
+
+void key_release_params(key_t *key, key_params_t params);
 
 #ifdef __cplusplus
 }

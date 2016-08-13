@@ -27,6 +27,8 @@
 #include "http/key.h"
 
 #include "include/arena.h"
+#include "include/parser.h"
+#include "include/parameters.h" /* ToDo: Should probably be removed */
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -38,10 +40,10 @@
 
 /* Initialize a Key object. This must be called before usage. */
 key_t *
-key_init(key_t *key, key_header_t get_header, key_malloc_t *mem_alloc, key_free_t *mem_free, size_t arena_size,
-         key_cache_store_t *cache_store, key_cache_lookup_t *cache_lookup, void *cache_data)
+key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t mem_free, size_t arena_size,
+         key_cache_store_t cache_store, key_cache_lookup_t cache_lookup, void *cache_data)
 {
-    key_malloc_t *allocator = mem_alloc ? mem_alloc : &malloc;
+    key_malloc_t allocator = mem_alloc ? mem_alloc : &malloc;
 
     assert(get_header);
     
@@ -82,7 +84,7 @@ key_release(key_t *key)
 }
 
 void
-key_release_params(key_t *key, key_params_t *params)
+key_release_params(key_t *key, key_params_t params)
 {
     assert(key);
     assert(params);
@@ -90,7 +92,55 @@ key_release_params(key_t *key, key_params_t *params)
     /* The first Key parameter object is the first value in the arena, right after the arena object itself,
        so the start of the arena can be calculated from this. Yes, slightly ugly, but avoid wasting 8 bytes
        in every parameter object, or another struct object to manage the two. */
-    key_arena_destroy((key_arena_t *)(params - KEY_ARENA_ALIGN(sizeof(key_arena_t))));
+    key_arena_destroy(key, (key_arena_t *)((unsigned char*)params - KEY_ARENA_ALIGN(sizeof(key_arena_t))));
+}
+
+
+/* Main Key parser entry point. */
+key_parse_status
+key_parse(key_t *key, const char *key_string, size_t header_len, key_params_t *params, size_t *num_params)
+{
+    key_arena_t *arena;
+
+    assert(key);
+
+    if ((arena = key_arena_create(key))) {
+        key_common_t* param;
+
+        param = key_factory(arena, KEY_PARAM_SUBSTR, "accept-encoding", 0);
+        if (param) {
+            key_param_substr_t *substr = (key_param_substr_t *)param;
+
+            substr->substr = "gzip";
+            substr->substr_len = 4;
+            *params = (key_params_t)param;
+        }
+        return KEY_PARSE_OK;
+    }
+
+    return KEY_PARSE_ERROR;
+}
+
+/* Main evaluation entry point */
+int
+key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size)
+{
+    key_common_t *param = (key_common_t*)params;
+    size_t pos = 0;
+
+    while (param) {
+        size_t val_len;
+        const char* value = key->get_header(header_data, param->header, param->header_len, &val_len);
+
+        if (value && (val_len > 0)) {
+            int len = param->evaluator(param, value, val_len, buf, pos, buf_size);
+
+            pos += len;
+            param = param->next;
+        }
+    }
+
+    return pos;
 }
 
 

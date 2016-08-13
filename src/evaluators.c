@@ -25,8 +25,8 @@
 #include "include/parameters.h"
 #include "include/evaluators.h"
 
-int
-key_eval_div(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+size_t
+key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     key_param_div_t *div = (key_param_div_t *)param;
 
@@ -35,8 +35,8 @@ key_eval_div(void *param, const char *value, size_t value_len, char *buf, size_t
     return 0;
 }
 
-int
-key_eval_partition(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+size_t
+key_eval_partition(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     key_param_partition_t *partition = (key_param_partition_t *)param;
 
@@ -45,8 +45,8 @@ key_eval_partition(void *param, const char *value, size_t value_len, char *buf, 
     return 0;
 }
 
-int
-key_eval_match(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+size_t
+key_eval_match(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     key_param_match_t *match = (key_param_match_t *)param;
 
@@ -55,18 +55,24 @@ key_eval_match(void *param, const char *value, size_t value_len, char *buf, size
     return 0;
 }
 
-int
-key_eval_substr(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+size_t
+key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     key_param_substr_t *substr = (key_param_substr_t *)param;
 
     assert(substr->c.type == KEY_PARAM_SUBSTR);
+    printf("Header is %.*s: %.*s\n", (int)substr->c.header_len, substr->c.header, (int)value_len, value);
+
+    if ((value_len >= substr->substr_len) && strnstr(value, substr->substr, value_len)) {
+        *buf = '1';
+        return 1;
+    }
 
     return 0;
 }
 
-int
-key_eval_param(void *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+size_t
+key_eval_param(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     key_param_param_t *substr = (key_param_param_t *)param;
 

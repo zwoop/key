@@ -35,6 +35,10 @@
 
 # Various other standard files
 *~
+TAGS
+GPATH
+GRTAGS
+GTAGS
 
 # Autoconf
 Makefile
@@ -48,7 +52,6 @@ libtool
 aclocal.m4
 autom4te.cache
 configure
-TAGS
 autoscan.log
 configure.scan
 

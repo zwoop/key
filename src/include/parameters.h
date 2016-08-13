@@ -27,7 +27,10 @@
 #include "http/key.h"
 
 #include "include/platform.h"
-#include "include/evaluators.h"
+
+struct _key_common;
+typedef size_t(key_evaluator_t)(struct _key_common *param, const char *value, size_t value_len, char *buf, size_t start,
+                                size_t buf_size);
 
 #if HAVE_STDINT_H
 #include <stdint.h>
@@ -41,12 +44,13 @@ typedef enum {
     KEY_PARAM_PARAM,
 } key_param_types_t;
 
-typedef struct {
+typedef struct _key_common {
     key_param_types_t type;
     key_evaluator_t *evaluator;
     const char *header;
     size_t header_len;
     const char *debug_name;
+    struct _key_common *next; /* ToDo: Could this maybe instead be a size_t offset within the arena ? */
 } key_common_t;
 
 typedef struct {
