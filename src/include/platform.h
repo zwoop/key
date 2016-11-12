@@ -31,6 +31,12 @@
 #error Need memset(), file a ticket for this platform!
 #endif
 
+#if HAVE_MEMCHR
+#define key_memchr memchr
+#else
+#error Need memset(), file a ticket for this platform!
+#endif
+
 #if HAVE_STRCHR
 #define key_strchr strchr
 #else

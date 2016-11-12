@@ -19,8 +19,8 @@
 m4_define([KEY_VERSION_S],[1.0.0])
 m4_define([KEY_VERSION_N],[1000000])
 
-AC_INIT([HTTP Key Library], KEY_VERSION_S(), [leif@ogre.com], [key], [https://github.com/zwoop/key])
 AC_PREREQ([2.69])
+AC_INIT([HTTP Key Library], KEY_VERSION_S(), [leif@ogre.com], [key], [https://github.com/zwoop/key])
 
 AC_CONFIG_HEADERS([src/include/key_config.h])
 AC_CONFIG_AUX_DIR([build/_aux])
@@ -64,7 +64,7 @@ TS_ADDTO(CFLAGS, [-Wall])
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([stddef.h string.h])
+AC_CHECK_HEADERS([stddef.h stdint.h stdlib.h string.h strings.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -74,6 +74,7 @@ AC_TYPE_UINT64_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([memchr])
 AC_CHECK_FUNCS([strchr])
 AC_CHECK_FUNCS([strdup])
 AC_CHECK_FUNCS([strncasecmp])

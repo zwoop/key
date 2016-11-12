@@ -56,7 +56,7 @@ key_strsep(const char* value, size_t value_len, const char** start, const char**
     }
 
     /* Look for a separator character */
-    if ((*next = memchr(*start, separator, value_len - (*start - value)))) {
+    if ((*next = key_memchr(*start, separator, value_len - (*start - value)))) {
         token_end = *next - 1;
     } else {
         /* No separators left in the string, end of token is end of value string */
