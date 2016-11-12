@@ -103,7 +103,6 @@ key_parse(key_t *key, const char *key_string, size_t header_len, key_params_t *p
     key_arena_t *arena;
 
     assert(key);
-
     if ((arena = key_arena_create(key))) {
         key_common_t* param;
 
@@ -143,6 +142,7 @@ key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t b
                 break;
             }
         } else {
+            /* This deals with step 1 in all evaluators; header is not present */
             if ((buf_size - pos) >= 4) {
                 memcpy(buf + pos, "none", 4);
                 pos += 4;

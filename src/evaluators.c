@@ -23,12 +23,53 @@
 #include <assert.h>
 #include "include/platform.h"
 
+#include <ctype.h>
+
 #if HAVE_STRING_H
 #include <string.h>
 #endif
 
 #include "include/parameters.h"
 #include "include/evaluators.h"
+
+/* This is an specialized implementation of strsep(), obviously not compatible, but useful
+   for us since it does the following:
+
+   1) Separates tokens on the character
+   2) Does not modify the input string
+   3) Does not need to be a NULL terminated string (hence the wonky passing of value/value_len)
+   4) Strips leading and trailing spaces
+*/
+static
+size_t
+key_strsep(const char* value, size_t value_len, const char** start, const char** next, const char separator)
+{
+    const char *token_end = NULL; /* Used for calculating the size of the token */
+
+    /* Strip any leading whitespaces */
+    while (*start && ((value_len - (*start - value)) > 0) && isspace(**start)) {
+        ++*start;
+    }
+    /* Not exactly necessary, but avoids some calls in the case of trailing spaces. */
+    if (*start >= (value + value_len)) {
+        return 0;
+    }
+
+    /* Look for a separator character */
+    if ((*next = memchr(*start, separator, value_len - (*start - value)))) {
+        token_end = *next - 1;
+    } else {
+        /* No separators left in the string, end of token is end of value string */
+        token_end = *next = (value + value_len - 1);
+    }
+
+    /* Strip trailing whitespaces */
+    while ((token_end > *start) && isspace(*token_end)) {
+        --token_end;
+    }
+
+    return (token_end - *start + 1);
+}
 
 size_t
 key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
@@ -38,7 +79,7 @@ key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf
     assert(div->c.type == KEY_PARAM_DIV);
 
     /* 2.3.1:
-
+       ------
        1)  If "parameter_value" is "0", fail parameter processing
            Section 2.2.2.
        2)  If "header_value" is the empty string, return "none".
@@ -62,7 +103,7 @@ key_eval_partition(key_common_t *param, const char *value, size_t value_len, cha
     assert(partition->c.type == KEY_PARAM_PARTITION);
 
     /* 2.3.2:
-
+       ------
        1)  If "header_value" is the empty string, return "none".
        2)  If "header_value" contains a ",", remove it and all subsequent
            characters.
@@ -85,12 +126,15 @@ key_eval_partition(key_common_t *param, const char *value, size_t value_len, cha
 size_t
 key_eval_match(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
+    const char *token_start = value;
+    const char *token_next = NULL;
+    size_t token_len;
     key_param_match_t *match = (key_param_match_t *)param;
 
     assert(match->c.type == KEY_PARAM_MATCH);
 
     /* 2.3.3:
-
+       ------
        1)  If "header_value" is the empty string, return "none".
        2)  Create "header_list" by splitting "header_value" on ","
            characters.
@@ -100,13 +144,24 @@ key_eval_match(key_common_t *param, const char *value, size_t value_len, char *b
                identical to "parameter_value", return "1".
        4)  Return "0".
     */
+    while ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
+        if ((token_len == match->match_len) && !memcmp(token_start, match->match, token_len)) {
+            *buf = '1';
+            return 1;
+        }
+        token_start = token_next + 1;
+    }
 
-    return 0;
+    *buf = '0';
+    return 1;
 }
 
 size_t
 key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
+    const char *token_start = value;
+    const char *token_next = NULL;
+    size_t token_len;
     key_param_substr_t *substr = (key_param_substr_t *)param;
 
     assert(substr->c.type == KEY_PARAM_SUBSTR);
@@ -114,7 +169,7 @@ key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *
     assert(start < buf_size); /* Room for at least a "1" or a "0" */
 
     /* 2.3.4:
-
+       ------
        1)  If "header_value" is the empty string, return "none".
        2)  Create "header_list" by splitting "header_value" on ","
            characters.
@@ -124,9 +179,12 @@ key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *
                present as a substring of "header_value", return "1".
        4)  Return "0".
     */
-    if ((value_len >= substr->substr_len) && memmem(value, value_len, substr->substr, substr->substr_len)) {
-        *buf = '1';
-        return 1;
+    while ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
+        if (memmem(token_start, token_len, substr->substr, substr->substr_len)) {
+            *buf = '1';
+            return 1;
+        }
+        token_start = token_next + 1;
     }
 
     *buf = '0';
@@ -139,6 +197,29 @@ key_eval_param(key_common_t *param, const char *value, size_t value_len, char *b
     key_param_param_t *substr = (key_param_param_t *)param;
 
     assert(substr->c.type == KEY_PARAM_PARAM);
+
+    /* 2.3.5:
+       ------
+       1)  Let "header_list" be an empty list.
+       2)  Create "header_list_tmp1" by splitting header_value on ","
+           characters.
+       3)  For each "header_item_tmp1" in "header_list_tmp1":
+           1)  Create "header_list_tmp2" by splitting "header_item_tmp1" on
+               ";" characters.
+           2)  For each "header_item_tmp2" in "header_list_tmp2":
+               1)  Remove leading and trailing WSP from "header_item_tmp2".
+               2)  Append "header_item_tmp2" to header_list.
+       4)  For each "header_item" in "header_list":
+           1)  If the "=" character does not occur within "header_item",
+               skip to the next "header_item".
+           2)  Let "item_name" be the string occurring before the first "="
+               character in "header_item".
+           3)  If "item_name" does not case-insensitively match
+               "parameter_value", skip to the next "header_item".
+           4)  Return the string occurring after the first "=" character in
+               "header_item".
+           5)  Return the empty string.
+    */
 
     return 0;
 }
