@@ -86,13 +86,12 @@ key_release(key_t *key)
 void
 key_release_params(key_t *key, key_params_t params)
 {
+    key_common_t *param = (key_common_t*)params;
+
     assert(key);
     assert(params);
 
-    /* The first Key parameter object is the first value in the arena, right after the arena object itself,
-       so the start of the arena can be calculated from this. Yes, slightly ugly, but avoid wasting 8 bytes
-       in every parameter object, or another struct object to manage the two. */
-    key_arena_destroy(key, (key_arena_t *)((unsigned char*)params - KEY_ARENA_ALIGN(sizeof(key_arena_t))));
+    key_arena_destroy(key, param->arena);
 }
 
 

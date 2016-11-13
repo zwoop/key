@@ -26,6 +26,7 @@
 
 #include "http/key.h"
 #include "include/platform.h"
+#include "include/arena.h"
 
 struct _key_common;
 typedef size_t(key_evaluator_t)(struct _key_common *param, const char *value, size_t value_len, char *buf, size_t start,
@@ -49,8 +50,8 @@ typedef struct _key_common {
     const char *header;
     size_t header_len;
     const char *debug_name;
+    key_arena_t *arena; /* Slightly wasteful, but ce la vie */
     struct _key_common *next;
-    /* ToDo: Add a pointer to the arena here. Yes, it will duplicate the pointer often, but it got ugly */
 } key_common_t;
 
 typedef struct {

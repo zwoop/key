@@ -47,6 +47,7 @@ static const key_param_div_t g_div = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "DIV",
+    .c.arena = NULL,
     .c.next = NULL,
     .divider = 0,
 };
@@ -57,6 +58,7 @@ static const key_param_partition_t g_partition = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "PARTITION",
+    .c.arena = NULL,
     .c.next = NULL,
     .partitions = {0},
     .num_partitions = 0,
@@ -68,6 +70,7 @@ static const key_param_match_t g_match = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "MATCH",
+    .c.arena = NULL,
     .c.next = NULL,
     .match = NULL,
     .match_len = 0,
@@ -79,6 +82,7 @@ static const key_param_substr_t g_substr = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "SUBSTR",
+    .c.arena = NULL,
     .c.next = NULL,
     .substr = NULL,
     .substr_len = 0,
@@ -90,6 +94,7 @@ static const key_param_param_t g_param = {
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "param",
+    .c.arena = NULL,
     .c.next = NULL,
     .param = NULL,
     .param_len = 0,
@@ -145,6 +150,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
     key_common_t *param = NULL;
     const char* delim = memchr(param_str, '=', param_len);
     size_t type_len, arg_len;
+    void *arg;
 
     if (!delim) {
         return NULL;
@@ -153,6 +159,10 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
     /* Setup the parameter argument, which must be copied unto the arena */
     type_len = (delim - param_str);
     arg_len = (param_str + param_len - delim - 1);
+    if (!(arg = key_arena_allocate(arena, arg_len))) {
+        return NULL;
+    }
+    memcpy(arg, delim + 1, arg_len);
 
     if (0 == header_len) {
         header_len = strlen(header);
@@ -164,7 +174,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             key_param_div_t *p = (key_param_div_t *)key_arena_allocate(arena, sizeof(key_param_div_t));
 
             if (p) {
-                memcpy(p, &g_div, sizeof(g_div));
+                memcpy(p, &g_div, sizeof(g_div)); /* Copy the template */
                 param = &p->c;
             }
         }
@@ -174,7 +184,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             key_param_partition_t *p = (key_param_partition_t*)key_arena_allocate(arena, sizeof(key_param_partition_t));
 
             if (p) {
-                memcpy(p, &g_partition, sizeof(g_partition));
+                memcpy(p, &g_partition, sizeof(g_partition)); /* Copy the template */
                 param = &p->c;
             }
         }
@@ -187,7 +197,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
                 key_param_match_t *p = (key_param_match_t *)key_arena_allocate(arena, sizeof(key_param_match_t));
 
                 if (p) {
-                    memcpy(p, &g_match, sizeof(g_match));
+                    memcpy(p, &g_match, sizeof(g_match)); /* Copy the template */
                     param = &p->c;
                 }
             }
@@ -198,7 +208,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
                 key_param_param_t *p = (key_param_param_t *)key_arena_allocate(arena, sizeof(key_param_param_t));
 
                 if (p) {
-                    memcpy(p, &g_param, sizeof(g_param));
+                    memcpy(p, &g_param, sizeof(g_param)); /* Copy the template */
                     param = &p->c;
                 }
             }
@@ -210,17 +220,10 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             key_param_substr_t *p = (key_param_substr_t *)key_arena_allocate(arena, sizeof(key_param_substr_t));
 
             if (p) {
-                /* ToDo: Once we add the arena pointer to the object, we can move this earlier and cleanup
-                   all the complex pointer arithmetic */
-                void *arg = key_arena_allocate(arena, arg_len);
-
-                if (arg) {
-                    memcpy(arg, delim + 1, arg_len);
-                    memcpy(p, &g_substr, sizeof(g_substr));
-                    p->substr = arg;
-                    p->substr_len = arg_len;
-                    param = &p->c;
-                }
+                memcpy(p, &g_substr, sizeof(g_substr)); /* Copy the template */
+                p->substr = arg;
+                p->substr_len = arg_len;
+                param = &p->c;
             }
         }
         break;
@@ -232,6 +235,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
     if (param) {
         void *hdr = key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
 
+        param->arena = arena;
         if (hdr) {
             memcpy(hdr, header, header_len);
             *((char*)hdr + header_len) = '\0';
