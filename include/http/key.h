@@ -76,7 +76,7 @@ key_t *key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key
                 key_cache_store_t cache_store, key_cache_lookup_t cache_lookup, void *cache_data);
 void key_release(key_t *key);
 
-key_parse_status key_parse(key_t *key, const char *key_string, size_t header_len, key_params_t *params, size_t *num_params);
+key_parse_status key_parse(key_t *key, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params);
 key_parse_status key_parse_header(key_t *key, void *, key_params_t *params, size_t *num_params);
 
 int key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size);

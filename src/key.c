@@ -98,27 +98,62 @@ key_release_params(key_t *key, key_params_t params)
 
 /* Main Key parser entry point. */
 key_parse_status
-key_parse(key_t *key, const char *key_string, size_t header_len, key_params_t *params, size_t *num_params)
+key_parse(key_t *key, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params)
 {
     key_arena_t *arena;
+    const char *comma_start = key_string;
+    const char *comma_next = NULL;
+    size_t comma_len;
 
     assert(key);
-    if ((arena = key_arena_create(key))) {
-        key_common_t* param;
+    *params = NULL; /* Make sure we start with a fresh entry */
 
-        /* ToDo: This is obviously just made up, but testing the factory now */
-        param = key_factory(arena, "substr", 6, "accept-encoding", 0);
-        if (param) {
-            key_param_substr_t *substr = (key_param_substr_t *)param;
-
-            substr->substr = "gzip";
-            substr->substr_len = 4;
-            *params = (key_params_t)param;
-        }
-        return KEY_PARSE_OK;
+    if (!(arena = key_arena_create(key))) {
+        return KEY_PARSE_ERROR;
     }
 
-    return KEY_PARSE_ERROR;
+    while ((comma_len = key_strsep(key_string, key_string_len, &comma_start, &comma_next, ',')) > 0) {
+        key_common_t* param = NULL;
+        const char* header = NULL;
+        size_t header_len = 0;
+        const char *semi_start = comma_start;
+        const char *semi_next = NULL;
+        size_t semi_len;
+
+        while ((semi_len = key_strsep(comma_start, comma_len, &semi_start, &semi_next, ';')) > 0) {
+            if (NULL == header) {
+                header = semi_start;
+                header_len = semi_len;
+            } else if (NULL == param) {
+                if (!(param = key_factory(arena, semi_start, semi_len, header, header_len))) {
+                    key_arena_destroy(key, arena);
+                    return KEY_PARSE_ERROR;
+                }
+                if (!*params) {
+                    *params = (key_params_t)param;
+                } else {
+                    key_common_t *p = (key_common_t*)*params;
+
+                    /* Chain into the linked list of parameters */
+                    while (p->next) {
+                        p = p->next;
+                    }
+                    p->next = param;
+                }
+                /* Reset for next parameter */
+                param = NULL;
+            } else {
+                /* ToDo: hmmm, what case is this? :-) */
+            }
+            /* Reset for the next parameter */
+            semi_start = semi_next;
+        }
+        /* Reset for the next header */
+        header = NULL;
+        comma_start = comma_next;
+    }
+
+    return KEY_PARSE_OK;
 }
 
 /* Main evaluation entry point */
@@ -134,15 +169,15 @@ key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t b
 
         if (value && (val_len > 0)) {
             if (pos < buf_size) { /* Room for at least one digit, no need to check those */
-                int len = param->evaluator(param, value, val_len, buf, pos, buf_size);
+                int len = param->evaluator(param, value, val_len, buf, pos, buf_size); /* Header val can not be NULL */
 
                 pos += len;
             } else {
-                /* ToDo: Deal with buffer error */
+                /* ToDo: Deal with buffer error here */
                 break;
             }
         } else {
-            /* This deals with step 1 in all evaluators; header is not present */
+            /* This deals with step 1 in all evaluators; header is not present. */
             if ((buf_size - pos) >= 4) {
                 memcpy(buf + pos, "none", 4);
                 pos += 4;

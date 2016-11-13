@@ -25,7 +25,6 @@
 #define KEY_PARAMETERS_H
 
 #include "http/key.h"
-
 #include "include/platform.h"
 
 struct _key_common;
@@ -50,7 +49,8 @@ typedef struct _key_common {
     const char *header;
     size_t header_len;
     const char *debug_name;
-    struct _key_common *next; /* ToDo: Could this maybe instead be a size_t offset within the arena ? */
+    struct _key_common *next;
+    /* ToDo: Add a pointer to the arena here. Yes, it will duplicate the pointer often, but it got ugly */
 } key_common_t;
 
 typedef struct {
@@ -60,7 +60,7 @@ typedef struct {
 
 typedef struct {
     key_common_t c;
-    uint64_t partitions[KEY_MAX_PARTITIONS]; /* Eeep */
+    uint64_t partitions[KEY_MAX_PARTITIONS]; /* ToDo: Eeep */
     size_t num_partitions;
 } key_param_partition_t;
 

@@ -23,6 +23,7 @@
     limitations under the License.
 */
 #include <assert.h>
+#include <ctype.h>
 
 #include "include/parser.h"
 #include "include/evaluators.h"
@@ -94,22 +95,72 @@ static const key_param_param_t g_param = {
     .param_len = 0,
 };
 
+/* This is an specialized implementation of strsep(), obviously not compatible, but useful
+   for us since it does the following:
+
+   1) Separates tokens on the character
+   2) Does not modify the input string
+   3) Does not need to be a NULL terminated string (hence the wonky passing of value/value_len)
+   4) Strips leading and trailing spaces
+
+   ToDo: This must deal with quotations ("") !!
+p*/
+size_t
+key_strsep(const char* value, size_t value_len, const char** start, const char** next, const char separator)
+{
+    const char *token_end = NULL; /* Used for calculating the size of the token */
+
+    /* Strip any leading whitespaces */
+    while (*start && ((value_len - (*start - value)) > 0) && isspace(**start)) {
+        ++*start;
+    }
+    /* Not exactly necessary, but avoids some calls in the case of trailing spaces. */
+    if (*start >= (value + value_len)) {
+        return 0;
+    }
+
+    /* Look for a separator character */
+    if ((*next = key_memchr(*start, separator, value_len - (*start - value)))) {
+        token_end = *next - 1;
+    } else {
+        /* No separators left in the string, end of token is end of value string */
+        token_end = *next = (value + value_len - 1);
+    }
+
+    /* Strip trailing whitespaces */
+    while ((token_end > *start) && isspace(*token_end)) {
+        --token_end;
+    }
+
+    /* Skip past the separator for the next token */
+    ++*next;
+
+    return (token_end - *start + 1);
+}
+
 /* This is the main factory for creating new objects. */
 key_common_t *
-key_factory(key_arena_t *arena, const char* type, size_t type_len, const char *header, size_t header_len)
+key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const char *header, size_t header_len)
 {
     key_common_t *param = NULL;
+    const char* delim = memchr(param_str, '=', param_len);
+    size_t type_len, arg_len;
+
+    if (!delim) {
+        return NULL;
+    }
+
+    /* Setup the parameter argument, which must be copied unto the arena */
+    type_len = (delim - param_str);
+    arg_len = (param_str + param_len - delim - 1);
 
     if (0 == header_len) {
         header_len = strlen(header);
     }
-    if (0 == type_len) {
-        type_len = strlen(type);
-    }
 
     switch (type_len) {
     case 3: /* DIV */
-        if (!key_strncasecmp(type, "div", 3)) {
+        if (!key_strncasecmp(param_str, "div", 3)) {
             key_param_div_t *p = (key_param_div_t *)key_arena_allocate(arena, sizeof(key_param_div_t));
 
             if (p) {
@@ -119,7 +170,7 @@ key_factory(key_arena_t *arena, const char* type, size_t type_len, const char *h
         }
         break;
     case 9: /* PARTITION */
-        if (!key_strncasecmp(type, "partition", 9)) {
+        if (!key_strncasecmp(param_str, "partition", 9)) {
             key_param_partition_t *p = (key_param_partition_t*)key_arena_allocate(arena, sizeof(key_param_partition_t));
 
             if (p) {
@@ -129,10 +180,10 @@ key_factory(key_arena_t *arena, const char* type, size_t type_len, const char *h
         }
         break;
     case 5: /* MATCH and PARAM */
-        switch (*type) {
+        switch (*param_str) {
         case 'm':
         case 'M':
-            if (!key_strncasecmp(type, "match", 5)) {
+            if (!key_strncasecmp(param_str, "match", 5)) {
                 key_param_match_t *p = (key_param_match_t *)key_arena_allocate(arena, sizeof(key_param_match_t));
 
                 if (p) {
@@ -143,7 +194,7 @@ key_factory(key_arena_t *arena, const char* type, size_t type_len, const char *h
             break;
         case 'p':
         case 'P':
-            if (!key_strncasecmp(type, "param", 5)) {
+            if (!key_strncasecmp(param_str, "param", 5)) {
                 key_param_param_t *p = (key_param_param_t *)key_arena_allocate(arena, sizeof(key_param_param_t));
 
                 if (p) {
@@ -155,12 +206,21 @@ key_factory(key_arena_t *arena, const char* type, size_t type_len, const char *h
         }
         break;
     case 6: /* SUBSTR */
-        if (!key_strncasecmp(type, "substr", 6)) {
+        if (!key_strncasecmp(param_str, "substr", 6)) {
             key_param_substr_t *p = (key_param_substr_t *)key_arena_allocate(arena, sizeof(key_param_substr_t));
 
             if (p) {
-                memcpy(p, &g_substr, sizeof(g_substr));
-                param = &p->c;
+                /* ToDo: Once we add the arena pointer to the object, we can move this earlier and cleanup
+                   all the complex pointer arithmetic */
+                void *arg = key_arena_allocate(arena, arg_len);
+
+                if (arg) {
+                    memcpy(arg, delim + 1, arg_len);
+                    memcpy(p, &g_substr, sizeof(g_substr));
+                    p->substr = arg;
+                    p->substr_len = arg_len;
+                    param = &p->c;
+                }
             }
         }
         break;

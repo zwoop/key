@@ -39,7 +39,6 @@ key_arena_create(key_t *key)
         key_arena_t *arena = (key_arena_t *)key->malloc(key->arena_size);
 
         if (arena) {
-            /* printf("Created ARENA is %p\n", (void*)arena); */
             arena->size = key->arena_size;
             arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
 
@@ -57,7 +56,6 @@ key_arena_destroy(key_t *key, key_arena_t *arena)
     assert(key);
     assert(arena);
 
-    /* printf("Destroy ARENA is %p\n", (void*)arena); */
     key->free(arena);
 }
 

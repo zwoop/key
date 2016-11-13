@@ -22,8 +22,7 @@
 */
 #include <assert.h>
 #include "include/platform.h"
-
-#include <ctype.h>
+#include "include/parser.h"
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -31,45 +30,6 @@
 
 #include "include/parameters.h"
 #include "include/evaluators.h"
-
-/* This is an specialized implementation of strsep(), obviously not compatible, but useful
-   for us since it does the following:
-
-   1) Separates tokens on the character
-   2) Does not modify the input string
-   3) Does not need to be a NULL terminated string (hence the wonky passing of value/value_len)
-   4) Strips leading and trailing spaces
-*/
-static
-size_t
-key_strsep(const char* value, size_t value_len, const char** start, const char** next, const char separator)
-{
-    const char *token_end = NULL; /* Used for calculating the size of the token */
-
-    /* Strip any leading whitespaces */
-    while (*start && ((value_len - (*start - value)) > 0) && isspace(**start)) {
-        ++*start;
-    }
-    /* Not exactly necessary, but avoids some calls in the case of trailing spaces. */
-    if (*start >= (value + value_len)) {
-        return 0;
-    }
-
-    /* Look for a separator character */
-    if ((*next = key_memchr(*start, separator, value_len - (*start - value)))) {
-        token_end = *next - 1;
-    } else {
-        /* No separators left in the string, end of token is end of value string */
-        token_end = *next = (value + value_len - 1);
-    }
-
-    /* Strip trailing whitespaces */
-    while ((token_end > *start) && isspace(*token_end)) {
-        --token_end;
-    }
-
-    return (token_end - *start + 1);
-}
 
 size_t
 key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
@@ -146,13 +106,13 @@ key_eval_match(key_common_t *param, const char *value, size_t value_len, char *b
     */
     while ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
         if ((token_len == match->match_len) && !memcmp(token_start, match->match, token_len)) {
-            *buf = '1';
+            *(buf + start) = '1';
             return 1;
         }
-        token_start = token_next + 1;
+        token_start = token_next;
     }
 
-    *buf = '0';
+    *(buf + start) = '0';
     return 1;
 }
 
@@ -181,13 +141,13 @@ key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *
     */
     while ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
         if (memmem(token_start, token_len, substr->substr, substr->substr_len)) {
-            *buf = '1';
+            *(buf + start) = '1';
             return 1;
         }
-        token_start = token_next + 1;
+        token_start = token_next;
     }
 
-    *buf = '0';
+    *(buf + start) = '0';
     return 1;
 }
 
