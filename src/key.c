@@ -27,7 +27,6 @@
 #include "http/key.h"
 
 #include "include/arena.h"
-#include "include/parser.h"
 #include "include/parameters.h" /* ToDo: Should probably be removed */
 
 #if HAVE_STDLIB_H
@@ -92,67 +91,6 @@ key_release_params(key_t *key, key_params_t params)
     assert(params);
 
     key_arena_destroy(key, param->arena);
-}
-
-
-/* Main Key parser entry point. */
-key_parse_status
-key_parse(key_t *key, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params)
-{
-    key_arena_t *arena;
-    const char *comma_start = key_string;
-    const char *comma_next = NULL;
-    size_t comma_len;
-
-    assert(key);
-    *params = NULL; /* Make sure we start with a fresh entry */
-
-    if (!(arena = key_arena_create(key))) {
-        return KEY_PARSE_ERROR;
-    }
-
-    while ((comma_len = key_strsep(key_string, key_string_len, &comma_start, &comma_next, ',')) > 0) {
-        key_common_t* param = NULL;
-        const char* header = NULL;
-        size_t header_len = 0;
-        const char *semi_start = comma_start;
-        const char *semi_next = NULL;
-        size_t semi_len;
-
-        while ((semi_len = key_strsep(comma_start, comma_len, &semi_start, &semi_next, ';')) > 0) {
-            if (NULL == header) {
-                header = semi_start;
-                header_len = semi_len;
-            } else if (NULL == param) {
-                if (!(param = key_factory(arena, semi_start, semi_len, header, header_len))) {
-                    key_arena_destroy(key, arena);
-                    return KEY_PARSE_ERROR;
-                }
-                if (!*params) {
-                    *params = (key_params_t)param;
-                } else {
-                    key_common_t *p = (key_common_t*)*params;
-
-                    /* Chain into the linked list of parameters */
-                    while (p->next) {
-                        p = p->next;
-                    }
-                    p->next = param;
-                }
-                /* Reset for next parameter */
-                param = NULL;
-            } else {
-                /* ToDo: hmmm, what case is this? :-) */
-            }
-            /* Reset for the next parameter */
-            semi_start = semi_next;
-        }
-        /* Reset for the next header */
-        header = NULL;
-        comma_start = comma_next;
-    }
-
-    return KEY_PARSE_OK;
 }
 
 /* Main evaluation entry point */

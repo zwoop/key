@@ -28,7 +28,6 @@
 #include "include/arena.h"
 
 size_t key_strsep(const char *value, size_t value_len, const char **start, const char **next, const char separator);
-key_common_t *key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const char *header, size_t header_len);
 
 #endif /* PARSER_H */
 
