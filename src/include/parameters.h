@@ -24,17 +24,17 @@
 #ifndef KEY_PARAMETERS_H
 #define KEY_PARAMETERS_H
 
-#include "http/key.h"
-#include "include/platform.h"
 #include "include/arena.h"
 
-struct _key_common;
-typedef size_t(key_evaluator_t)(struct _key_common *param, const char *value, size_t value_len, char *buf, size_t start,
-                                size_t buf_size);
+#include "include/platform.h"
 
 #if HAVE_STDINT_H
 #include <stdint.h>
 #endif
+
+struct _key_common;
+typedef size_t(key_evaluator_t)(struct _key_common *param, const char *value, size_t value_len, char *buf, size_t start,
+                                size_t buf_size);
 
 typedef enum {
     KEY_PARAM_DIV,

@@ -28,12 +28,8 @@
 
 #include "include/arena.h"
 
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
 key_arena_t*
-key_arena_create(key_t *key)
+p_key_arena_create(key_t *key)
 {
     if (key) {
         key_arena_t *arena = (key_arena_t *)key->malloc(key->arena_size);
@@ -51,7 +47,7 @@ key_arena_create(key_t *key)
 }
 
 void
-key_arena_destroy(key_t *key, key_arena_t *arena)
+p_key_arena_destroy(key_t *key, key_arena_t *arena)
 {
     assert(key);
     assert(arena);
@@ -60,7 +56,7 @@ key_arena_destroy(key_t *key, key_arena_t *arena)
 }
 
 void*
-key_arena_allocate(key_arena_t *arena, size_t size)
+p_key_arena_allocate(key_arena_t *arena, size_t size)
 {
     if (size <= (arena->pos - arena->size)) {
         void *memory = (void*)((unsigned char*)arena + arena->pos);

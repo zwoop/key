@@ -30,12 +30,7 @@
 #include <ctype.h>
 
 #include "http/key.h"
-
 #include "include/platform.h"
-
-#if HAVE__BOOL
-#include <stdbool.h>
-#endif
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -77,8 +72,8 @@ get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 static void
 add_header(const char *h)
 {
-    char *header = key_strdup(h);
-    char *sep = key_strchr(header, ':');
+    char *header = p_key_strdup(h);
+    char *sep = p_key_strchr(header, ':');
 
     if (sep) {
         *sep++ = '\0';

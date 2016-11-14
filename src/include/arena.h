@@ -27,8 +27,6 @@
 
 #include "http/key.h"
 
-#include "include/platform.h"
-
 /* ToDo: This might be x64 specific? But regardless, hardcoded to 16 byte alignments for now. */
 #define KEY_ARENA_ALIGN(p) (((p) + (16 - 1L)) & ~(16 - 1L))
 
@@ -38,10 +36,9 @@ typedef struct {
     size_t pos;
 } key_arena_t;
 
-key_arena_t *key_arena_create(key_t *key);
-void key_arena_destroy(key_t *key, key_arena_t *arena);
-
-void *key_arena_allocate(key_arena_t *arena, size_t size);
+key_arena_t *p_key_arena_create(key_t *key);
+void p_key_arena_destroy(key_t *key, key_arena_t *arena);
+void *p_key_arena_allocate(key_arena_t *arena, size_t size);
 
 #endif /* ARENA_H */
 

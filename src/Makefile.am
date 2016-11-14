@@ -22,5 +22,5 @@ AM_CFLAGS = -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libhttp_key.la
 
-libhttp_key_la_LDFLAGS = -no-undefined -version-info @KEY_LIBTOOL_VERSION@
+libhttp_key_la_LDFLAGS = -export-symbols-regex '^key_' -no-undefined -version-info @KEY_LIBTOOL_VERSION@
 libhttp_key_la_SOURCES = arena.c evaluators.c key.c parser.c 

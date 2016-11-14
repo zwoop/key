@@ -24,10 +24,10 @@
     limitations under the License.
 */
 #include <assert.h>
-#include "http/key.h"
 
-#include "include/arena.h"
-#include "include/parameters.h" /* ToDo: Should probably be removed */
+#include "http/key.h"
+#include "include/parameters.h"
+#include "include/platform.h"
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -68,7 +68,7 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t
         key->cache.lookup = cache_lookup;
         key->cache.data = cache_data;
     } else {
-        key_memset(&key->cache, 0, sizeof(key->cache));
+        p_key_memset(&key->cache, 0, sizeof(key->cache));
     }
 
     return key;
@@ -90,7 +90,7 @@ key_release_params(key_t *key, key_params_t params)
     assert(key);
     assert(params);
 
-    key_arena_destroy(key, param->arena);
+    p_key_arena_destroy(key, param->arena);
 }
 
 /* Main evaluation entry point */
@@ -128,7 +128,6 @@ key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t b
 
     return pos;
 }
-
 
 /*
   local variables:

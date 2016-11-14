@@ -29,6 +29,8 @@ AC_CONFIG_MACRO_DIR([build])
 AM_INIT_AUTOMAKE([-Wall -Werror -Wno-portability tar-ustar foreign no-installinfo no-installman subdir-objects 1.9.2])
 AM_MAINTAINER_MODE([enable])
 
+LT_INIT([disable-shared])
+
 # Library version details
 KEY_VERSION_MAJOR=$((KEY_VERSION_N() / 1000000 ))
 KEY_VERSION_MINOR=$(((KEY_VERSION_N() / 1000) % 1000 ))
@@ -54,7 +56,6 @@ AC_PROG_SED
 AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
-AC_PROG_RANLIB
 
 TS_ADDTO(CFLAGS, [-std=c11])
 TS_ADDTO(CFLAGS, [-pedantic])

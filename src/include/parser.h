@@ -24,11 +24,14 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "include/parameters.h"
-#include "include/arena.h"
+#include "include/platform.h"
 
-size_t key_strsep(const char *value, size_t value_len, const char **start, const char **next, const char separator);
-uint64_t key_memtoll(const char *str, size_t len);
+#if HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+size_t p_key_strsep(const char *value, size_t value_len, const char **start, const char **next, const char separator);
+uint64_t p_key_memtoll(const char *str, size_t len);
 
 #endif /* PARSER_H */
 
