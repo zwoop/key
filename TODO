@@ -1,0 +1,4 @@
+* Support the lookup / store functions for parsed Key object cache
+* Support "" around string values (for the tokenizer)
+* Finish all the parsers
+* Finish all the evaluators 

@@ -174,7 +174,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             key_param_div_t *p = (key_param_div_t *)key_arena_allocate(arena, sizeof(key_param_div_t));
 
             if (p) {
-                memcpy(p, &g_div, sizeof(g_div)); /* Copy the template */
+                memcpy(p, &g_div, sizeof(g_div)); /* Copy the Div template */
                 param = &p->c;
             }
         }
@@ -197,7 +197,9 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
                 key_param_match_t *p = (key_param_match_t *)key_arena_allocate(arena, sizeof(key_param_match_t));
 
                 if (p) {
-                    memcpy(p, &g_match, sizeof(g_match)); /* Copy the template */
+                    memcpy(p, &g_match, sizeof(g_match)); /* Copy the Matcher template */
+                    p->match = arg;
+                    p->match_len = arg_len;
                     param = &p->c;
                 }
             }
@@ -208,7 +210,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
                 key_param_param_t *p = (key_param_param_t *)key_arena_allocate(arena, sizeof(key_param_param_t));
 
                 if (p) {
-                    memcpy(p, &g_param, sizeof(g_param)); /* Copy the template */
+                    memcpy(p, &g_param, sizeof(g_param)); /* Copy the Param template */
                     param = &p->c;
                 }
             }
@@ -220,7 +222,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             key_param_substr_t *p = (key_param_substr_t *)key_arena_allocate(arena, sizeof(key_param_substr_t));
 
             if (p) {
-                memcpy(p, &g_substr, sizeof(g_substr)); /* Copy the template */
+                memcpy(p, &g_substr, sizeof(g_substr)); /* Copy the Substr template */
                 p->substr = arg;
                 p->substr_len = arg_len;
                 param = &p->c;
@@ -233,12 +235,15 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
 
     /* Dup the header string unto the arena */
     if (param) {
-        void *hdr = key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
+        char *hdr = (char*)key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
+        int i;
 
         param->arena = arena;
         if (hdr) {
-            memcpy(hdr, header, header_len);
-            *((char*)hdr + header_len) = '\0';
+            for (i = 0; i < header_len; ++i) {
+                hdr[i] = tolower(header[i]);
+            }
+            hdr[i] = '\0';
             param->header = (const char*)hdr;
             param->header_len = header_len;
 

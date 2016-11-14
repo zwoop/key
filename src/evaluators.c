@@ -92,6 +92,8 @@ key_eval_match(key_common_t *param, const char *value, size_t value_len, char *b
     key_param_match_t *match = (key_param_match_t *)param;
 
     assert(match->c.type == KEY_PARAM_MATCH);
+    assert(value && (value_len > 0));
+    assert(start < buf_size); /* Room for at least a "1" or a "0" */
 
     /* 2.3.3:
        ------
