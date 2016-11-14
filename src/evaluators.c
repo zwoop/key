@@ -22,13 +22,17 @@
 */
 #include <assert.h>
 #include <stdio.h>
+
+#include "include/platform.h"
+
+#if HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
 #endif
 
-#include "include/platform.h"
 #include "include/parser.h"
 
 #include "include/parameters.h"

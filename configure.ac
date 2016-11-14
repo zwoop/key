@@ -64,7 +64,7 @@ TS_ADDTO(CFLAGS, [-Wall])
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([stddef.h stdint.h stdlib.h string.h strings.h])
+AC_CHECK_HEADERS([inttypes.h stddef.h stdint.h stdlib.h string.h strings.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL

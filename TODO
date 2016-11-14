@@ -1,4 +1,9 @@
-* Support the lookup / store functions for parsed Key object cache
-* Support "" around string values (for the tokenizer)
-* Finish all the parsers
-* Finish all the evaluators 
+* First, look for the string "ToDo" in the source, and fix those!
+
+* Then look at
+
+     - Support the lookup / store functions for parsed Key object cache
+     - Support "" around string values (for the tokenizer)
+     - Finish all the parsers
+     - Finish all the evaluators
+     - The error cases are not handled well likely, we need to figure that out
