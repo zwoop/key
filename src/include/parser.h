@@ -28,6 +28,7 @@
 #include "include/arena.h"
 
 size_t key_strsep(const char *value, size_t value_len, const char **start, const char **next, const char separator);
+uint64_t key_memtoll(const char *str, size_t len);
 
 #endif /* PARSER_H */
 

@@ -1,5 +1,6 @@
+#! /usr/bin/env bash
 #
-# Top-level Makefile.am for the HTTP Key library
+# Test cases for the div parameter
 #
 #  Licensed to the Apache Software Foundation (ASF) under one
 #  or more contributor license agreements.  See the NOTICE file
@@ -17,15 +18,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-ACLOCAL_AMFLAGS = -I build
-SUBDIRS = src cmd test
+set -e # exit on error
 
-library_includedir = $(includedir)/http
-library_include_HEADERS = include/http/key.h
+CMD="../cmd/key-cmd -t"
 
-.PHONY: clang-format
+# ToDo: These aren't quite accurate to the RFC, because we don't handle ""'s
+[ "1,1" != $($CMD -H "Baz: charlie" "Baz;match=charlie") ] && exit -1
+[ "1,1" != $($CMD -H "Baz: foo, charlie" "Baz;match=charlie") ] && exit -1
+[ "1,1" != $($CMD -H "Baz: bar, charlie      , abc" "Baz;match=charlie") ] && exit -1
 
-clang-format:
-	clang-format -i include/http/*.h
-	clang-format -i src/include/*.[c,h]
-	clang-format -i cmd/*.[c,h]
+exit 0

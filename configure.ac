@@ -81,8 +81,9 @@ AC_CHECK_FUNCS([strncasecmp])
 
 # Genereated files
 AC_CONFIG_FILES([Makefile
+                 src/Makefile
                  cmd/Makefile
-                 src/Makefile])
+                 test/Makefile])
 
 # End
 AC_OUTPUT

@@ -21,12 +21,15 @@
     limitations under the License.
 */
 #include <assert.h>
-#include "include/platform.h"
-#include "include/parser.h"
+#include <stdio.h>
+#include <inttypes.h>
 
 #if HAVE_STRING_H
 #include <string.h>
 #endif
+
+#include "include/platform.h"
+#include "include/parser.h"
 
 #include "include/parameters.h"
 #include "include/evaluators.h"
@@ -34,6 +37,9 @@
 size_t
 key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
+    const char *token_start = value;
+    const char *token_next = NULL;
+    size_t token_len;
     key_param_div_t *div = (key_param_div_t *)param;
 
     assert(div->c.type == KEY_PARAM_DIV);
@@ -52,15 +58,28 @@ key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf
            (omitting the modulus).
     */
 
+    if ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
+        uint64_t p = key_memtoll(token_start, token_len);
+        int ret = snprintf(buf+start, buf_size - start, "%" PRIu64 "", (uint64_t)(p / div->divider));
+
+        /* ToDo: This doesn't deal with the buffer being too small, which is an error case */
+        return ret;
+    }
+
+    /* ToDo: error ! */
     return 0;
 }
 
 size_t
 key_eval_partition(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
+    const char *token_start = value;
+    const char *token_next = NULL;
+    size_t token_len;
     key_param_partition_t *partition = (key_param_partition_t *)param;
 
     assert(partition->c.type == KEY_PARAM_PARTITION);
+    assert(value && (value_len > 0));
 
     /* 2.3.2:
        ------
@@ -79,6 +98,9 @@ key_eval_partition(key_common_t *param, const char *value, size_t value_len, cha
            2)  Increment "segment_id" by 1.
        8)  Return "segment_id".
     */
+    if ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',') > 0)) {
+    } else {
+    }
 
     return 0;
 }

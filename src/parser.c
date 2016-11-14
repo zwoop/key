@@ -143,11 +143,28 @@ key_strsep(const char* value, size_t value_len, const char** start, const char**
     return (token_end - *start + 1);
 }
 
+/* Simplified strtoll, which works on non-null terminated buffers */
+uint64_t
+key_memtoll(const char *str, size_t len)
+{
+    uint64_t ret = 0;
+
+    while ((len > 0) && isspace(*str)) {
+        --len, ++str;
+    }
+    while ((len-- > 0) && isdigit(*str)) {
+        ret = ret*10 + *str++ - '0';
+    }
+
+    return ret;
+}
+
 /* This is the main factory for creating new objects. */
 static key_common_t *
 key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const char *header, size_t header_len)
 {
     key_common_t *param = NULL;
+    /* ToDo: Do we need to deal with WS's around the ='s ? */
     const char* delim = key_memchr(param_str, '=', param_len);
     size_t type_len, arg_len;
     void *arg;
@@ -159,10 +176,6 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
     /* Setup the parameter argument, which must be copied unto the arena */
     type_len = (delim - param_str);
     arg_len = (param_str + param_len - delim - 1);
-    if (!(arg = key_arena_allocate(arena, arg_len))) {
-        return NULL;
-    }
-    memcpy(arg, delim + 1, arg_len);
 
     if (0 == header_len) {
         header_len = strlen(header);
@@ -175,6 +188,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
 
             if (p) {
                 memcpy(p, &g_div, sizeof(g_div)); /* Copy the Div template */
+                p->divider = key_memtoll(delim + 1, arg_len);
                 param = &p->c;
             }
         }
@@ -198,6 +212,10 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
 
                 if (p) {
                     memcpy(p, &g_match, sizeof(g_match)); /* Copy the Matcher template */
+                    if (!(arg = key_arena_allocate(arena, arg_len))) {
+                        return NULL;
+                    }
+                    memcpy(arg, delim + 1, arg_len);
                     p->match = arg;
                     p->match_len = arg_len;
                     param = &p->c;
@@ -223,6 +241,10 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
 
             if (p) {
                 memcpy(p, &g_substr, sizeof(g_substr)); /* Copy the Substr template */
+                if (!(arg = key_arena_allocate(arena, arg_len))) {
+                    return NULL;
+                }
+                memcpy(arg, delim + 1, arg_len);
                 p->substr = arg;
                 p->substr_len = arg_len;
                 param = &p->c;

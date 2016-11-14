@@ -1,5 +1,6 @@
+#! /usr/bin/env bash
 #
-# Top-level Makefile.am for the HTTP Key library
+# Test cases for the div parameter
 #
 #  Licensed to the Apache Software Foundation (ASF) under one
 #  or more contributor license agreements.  See the NOTICE file
@@ -17,15 +18,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-ACLOCAL_AMFLAGS = -I build
-SUBDIRS = src cmd test
+set -e # exit on error
 
-library_includedir = $(includedir)/http
-library_include_HEADERS = include/http/key.h
+CMD="../cmd/key-cmd -t"
 
-.PHONY: clang-format
+# All in group 0
+[ "0,1" != $($CMD -H "Bar: 1" "Bar;div=5") ] && exit -1
+[ "0,1" != $($CMD -H "Bar: 3 , 42" "Bar;div=5") ] && exit -1
+[ "0,1" != $($CMD -H "Bar: 4, " "Bar;div=5") ] && exit -1
 
-clang-format:
-	clang-format -i include/http/*.h
-	clang-format -i src/include/*.[c,h]
-	clang-format -i cmd/*.[c,h]
+# Not in group 0
+[ "0,1" == $($CMD -H "Bar: 6, " "Bar;div=5") ] && exit -1
+[ "0,1" == $($CMD -H "Bar: 50, " "Bar;div=5") ] && exit -1
+
+# All in group 2
+[ "2,1" != $($CMD -H "Bar: 12" "Bar;div=5") ] && exit -1
+[ "2,1" != $($CMD -H "Bar: 10" "Bar;div=5") ] && exit -1
+[ "2,1" != $($CMD -H "Bar: 14, 1" "Bar;div=5") ] && exit -1
+
+# All in group 10
+[ "10,2" != $($CMD -H "Bar: 54" "Bar;div=5") ] && exit -1
+[ "10,2" != $($CMD -H "Bar:   52  , 100" "Bar;div=5") ] && exit -1
+
+exit 0

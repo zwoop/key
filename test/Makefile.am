@@ -17,15 +17,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-ACLOCAL_AMFLAGS = -I build
-SUBDIRS = src cmd test
+ACLOCAL_AMFLAGS = -I m4
 
-library_includedir = $(includedir)/http
-library_include_HEADERS = include/http/key.h
+AM_CFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src
 
-.PHONY: clang-format
-
-clang-format:
-	clang-format -i include/http/*.h
-	clang-format -i src/include/*.[c,h]
-	clang-format -i cmd/*.[c,h]
+TESTS = div.sh match.sh substr.sh

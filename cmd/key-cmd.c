@@ -113,6 +113,7 @@ main(int argc, const char *argv[])
 {
     key_t key;
     int i;
+    int terse = 0;
 
     /* getopt() options */
     static const struct option longopt[] = {
@@ -134,11 +135,14 @@ main(int argc, const char *argv[])
 
     /* Parse the command line arguments */
     while (1) {
-        int opt = getopt_long(argc, (char *const *)argv, "hH:", longopt, NULL);
+        int opt = getopt_long(argc, (char *const *)argv, "hH:t", longopt, NULL);
 
         switch (opt) {
             case 'H':
                 add_header(optarg);
+                break;
+            case 't':
+                terse = 1;
                 break;
             case 'h':
                 help();
@@ -171,7 +175,11 @@ main(int argc, const char *argv[])
         if (KEY_PARSE_OK == key_parse(&key, argv[i], strlen(argv[i]), &params, &num_params)) {
             int len = key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
 
-            printf("\tKey: %s -> \"%.*s\"\n", argv[i], len, buf);
+            if (terse) {
+                printf("%.*s,%d\n", len, buf, len);
+            } else {
+                printf("\tKey: %s -> \"%.*s\"\n", argv[i], len, buf);
+            }
             key_release_params(&key, params);
         } else {
             /* ToDo: Parse failure */

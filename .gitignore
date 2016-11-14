@@ -33,6 +33,10 @@
 *.dSYM/
 *.su
 
+# Test files
+*.log
+*.trs
+
 # Various other standard files
 *~
 TAGS
