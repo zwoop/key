@@ -34,7 +34,7 @@
 /* These are the template structures for each of the supported parameter evaluator types */
 static const key_param_div_t g_div = {
     .c.type = KEY_PARAM_DIV,
-    .c.evaluator = &p_key_eval_div,
+    .c.evaluator = &key_eval_div,
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "DIV",
@@ -45,7 +45,7 @@ static const key_param_div_t g_div = {
 
 static const key_param_partition_t g_partition = {
     .c.type = KEY_PARAM_PARTITION,
-    .c.evaluator = &p_key_eval_partition,
+    .c.evaluator = &key_eval_partition,
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "PARTITION",
@@ -57,7 +57,7 @@ static const key_param_partition_t g_partition = {
 
 static const key_param_match_t g_match = {
     .c.type = KEY_PARAM_MATCH,
-    .c.evaluator = &p_key_eval_match,
+    .c.evaluator = &key_eval_match,
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "MATCH",
@@ -69,7 +69,7 @@ static const key_param_match_t g_match = {
 
 static const key_param_substr_t g_substr = {
     .c.type = KEY_PARAM_SUBSTR,
-    .c.evaluator = &p_key_eval_substr,
+    .c.evaluator = &key_eval_substr,
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "SUBSTR",
@@ -81,7 +81,7 @@ static const key_param_substr_t g_substr = {
 
 static const key_param_param_t g_param = {
     .c.type = KEY_PARAM_PARAM,
-    .c.evaluator = &p_key_eval_param,
+    .c.evaluator = &key_eval_param,
     .c.header = NULL,
     .c.header_len = 0,
     .c.debug_name = "param",
@@ -102,7 +102,7 @@ static const key_param_param_t g_param = {
    ToDo: This must deal with quotations ("") !!
 p*/
 size_t
-p_key_strsep(const char *value, size_t value_len, const char **start, const char **next, const char separator)
+key_strsep(const char *value, size_t value_len, const char **start, const char **next, const char separator)
 {
     const char *token_end = NULL; /* Used for calculating the size of the token */
 
@@ -136,7 +136,7 @@ p_key_strsep(const char *value, size_t value_len, const char **start, const char
 
 /* Simplified strtoll, which works on non-null terminated buffers */
 uint64_t
-p_key_memtoll(const char *str, size_t len)
+key_memtoll(const char *str, size_t len)
 {
     uint64_t ret = 0;
 
@@ -152,11 +152,11 @@ p_key_memtoll(const char *str, size_t len)
 
 /* This is the main factory for creating new objects. */
 static key_common_t *
-p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const char *header, size_t header_len)
+key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const char *header, size_t header_len)
 {
     key_common_t *param = NULL;
     /* ToDo: Do we need to deal with WS's around the ='s ? */
-    const char *delim = p_key_memchr(param_str, '=', param_len);
+    const char *delim = key_memchr(param_str, '=', param_len);
     size_t type_len, arg_len;
     void *arg;
 
@@ -174,19 +174,19 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
 
     switch (type_len) {
         case 3: /* DIV */
-            if (!p_key_strncasecmp(param_str, "div", 3)) {
-                key_param_div_t *p = (key_param_div_t *)p_key_arena_allocate(arena, sizeof(key_param_div_t));
+            if (!key_strncasecmp(param_str, "div", 3)) {
+                key_param_div_t *p = (key_param_div_t *)key_arena_allocate(arena, sizeof(key_param_div_t));
 
                 if (p) {
                     memcpy(p, &g_div, sizeof(g_div)); /* Copy the Div template */
-                    p->divider = p_key_memtoll(delim + 1, arg_len);
+                    p->divider = key_memtoll(delim + 1, arg_len);
                     param = &p->c;
                 }
             }
             break;
         case 9: /* PARTITION */
-            if (!p_key_strncasecmp(param_str, "partition", 9)) {
-                key_param_partition_t *p = (key_param_partition_t *)p_key_arena_allocate(arena, sizeof(key_param_partition_t));
+            if (!key_strncasecmp(param_str, "partition", 9)) {
+                key_param_partition_t *p = (key_param_partition_t *)key_arena_allocate(arena, sizeof(key_param_partition_t));
 
                 if (p) {
                     memcpy(p, &g_partition, sizeof(g_partition)); /* Copy the template */
@@ -198,12 +198,12 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
             switch (*param_str) {
                 case 'm':
                 case 'M':
-                    if (!p_key_strncasecmp(param_str, "match", 5)) {
-                        key_param_match_t *p = (key_param_match_t *)p_key_arena_allocate(arena, sizeof(key_param_match_t));
+                    if (!key_strncasecmp(param_str, "match", 5)) {
+                        key_param_match_t *p = (key_param_match_t *)key_arena_allocate(arena, sizeof(key_param_match_t));
 
                         if (p) {
                             memcpy(p, &g_match, sizeof(g_match)); /* Copy the Matcher template */
-                            if (!(arg = p_key_arena_allocate(arena, arg_len))) {
+                            if (!(arg = key_arena_allocate(arena, arg_len))) {
                                 return NULL;
                             }
                             memcpy(arg, delim + 1, arg_len);
@@ -215,8 +215,8 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
                     break;
                 case 'p':
                 case 'P':
-                    if (!p_key_strncasecmp(param_str, "param", 5)) {
-                        key_param_param_t *p = (key_param_param_t *)p_key_arena_allocate(arena, sizeof(key_param_param_t));
+                    if (!key_strncasecmp(param_str, "param", 5)) {
+                        key_param_param_t *p = (key_param_param_t *)key_arena_allocate(arena, sizeof(key_param_param_t));
 
                         if (p) {
                             memcpy(p, &g_param, sizeof(g_param)); /* Copy the Param template */
@@ -227,12 +227,12 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
             }
             break;
         case 6: /* SUBSTR */
-            if (!p_key_strncasecmp(param_str, "substr", 6)) {
-                key_param_substr_t *p = (key_param_substr_t *)p_key_arena_allocate(arena, sizeof(key_param_substr_t));
+            if (!key_strncasecmp(param_str, "substr", 6)) {
+                key_param_substr_t *p = (key_param_substr_t *)key_arena_allocate(arena, sizeof(key_param_substr_t));
 
                 if (p) {
                     memcpy(p, &g_substr, sizeof(g_substr)); /* Copy the Substr template */
-                    if (!(arg = p_key_arena_allocate(arena, arg_len))) {
+                    if (!(arg = key_arena_allocate(arena, arg_len))) {
                         return NULL;
                     }
                     memcpy(arg, delim + 1, arg_len);
@@ -248,7 +248,7 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
 
     /* Dup the header string unto the arena */
     if (param) {
-        char *hdr = (char *)p_key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
+        char *hdr = (char *)key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
         int i;
 
         param->arena = arena;
@@ -268,19 +268,19 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
 }
 
 /* This is the primary, internal parser, it is not a public interface. */
-static key_parse_status
-p_key_parse_arena(key_arena_t *arena, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params)
+static http_key_parse_status
+key_parse_arena(key_arena_t *arena, const char *key_string, size_t key_string_len, http_key_params_t *params, size_t *num_params)
 {
     const char *comma_start = key_string;
     const char *comma_next = NULL;
     size_t comma_len;
 
     if (!arena) {
-        return KEY_PARSE_ERROR;
+        return HTTP_KEY_PARSE_ERROR;
     }
     *params = NULL; /* Make sure we start with a fresh entry */
 
-    while ((comma_len = p_key_strsep(key_string, key_string_len, &comma_start, &comma_next, ',')) > 0) {
+    while ((comma_len = key_strsep(key_string, key_string_len, &comma_start, &comma_next, ',')) > 0) {
         key_common_t *param = NULL;
         const char *header = NULL;
         size_t header_len = 0;
@@ -288,17 +288,17 @@ p_key_parse_arena(key_arena_t *arena, const char *key_string, size_t key_string_
         const char *semi_next = NULL;
         size_t semi_len;
 
-        while ((semi_len = p_key_strsep(comma_start, comma_len, &semi_start, &semi_next, ';')) > 0) {
+        while ((semi_len = key_strsep(comma_start, comma_len, &semi_start, &semi_next, ';')) > 0) {
             if (NULL == header) {
                 header = semi_start;
                 header_len = semi_len;
             } else if (NULL == param) {
-                if (!(param = p_key_factory(arena, semi_start, semi_len, header, header_len))) {
-                    p_key_arena_destroy(arena);
-                    return KEY_PARSE_ERROR;
+                if (!(param = key_factory(arena, semi_start, semi_len, header, header_len))) {
+                    key_arena_destroy(arena);
+                    return HTTP_KEY_PARSE_ERROR;
                 }
                 if (!*params) {
-                    *params = (key_params_t)param;
+                    *params = (http_key_params_t)param;
                 } else {
                     key_common_t *p = (key_common_t *)*params;
 
@@ -321,28 +321,28 @@ p_key_parse_arena(key_arena_t *arena, const char *key_string, size_t key_string_
         comma_start = comma_next;
     }
 
-    return KEY_PARSE_OK;
+    return HTTP_KEY_PARSE_OK;
 }
 
 /* The two main Key parser entry point. */
-key_parse_status
-key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len, key_params_t *params,
-                 size_t *num_params)
+http_key_parse_status
+http_key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len, http_key_params_t *params,
+                      size_t *num_params)
 {
-    key_arena_t *arena = p_key_arena_create(NULL, buffer, buffer_size);
+    key_arena_t *arena = key_arena_create(NULL, buffer, buffer_size);
 
-    return p_key_parse_arena(arena, key_string, key_string_len, params, num_params);
+    return key_parse_arena(arena, key_string, key_string_len, params, num_params);
 }
 
-key_parse_status
-key_parse(key_t *key, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params)
+http_key_parse_status
+http_key_parse(http_key_t *key, const char *key_string, size_t key_string_len, http_key_params_t *params, size_t *num_params)
 {
     key_arena_t *arena;
 
     assert(key);
-    arena = p_key_arena_create(key, key->malloc(key->arena_size), key->arena_size);
+    arena = key_arena_create(key, key->malloc(key->arena_size), key->arena_size);
 
-    return p_key_parse_arena(arena, key_string, key_string_len, params, num_params);
+    return key_parse_arena(arena, key_string, key_string_len, params, num_params);
 }
 
 /*

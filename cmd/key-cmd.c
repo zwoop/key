@@ -72,8 +72,8 @@ get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 static void
 add_header(const char *h)
 {
-    char *header = p_key_strdup(h);
-    char *sep = p_key_strchr(header, ':');
+    char *header = key_strdup(h);
+    char *sep = key_strchr(header, ':');
 
     if (sep) {
         *sep++ = '\0';
@@ -106,7 +106,7 @@ add_header(const char *h)
 int
 main(int argc, const char *argv[])
 {
-    key_t key;
+    http_key_t key;
     int i;
     int terse = 0;
 
@@ -116,14 +116,14 @@ main(int argc, const char *argv[])
     };
 
     /* Setup the main key object */
-    key_init(&key, &get_header, /* Header function */
-             NULL,              /* Use system malloc */
-             NULL,              /* Use system free */
-             4096,              /* Arbitrary arena size, which also dictates roughly the size of Key */
-             NULL,              /* No cache store */
-             NULL,              /* No cache lookup */
-             NULL               /* No cache data */
-             );
+    http_key_init(&key, &get_header, /* Header function */
+                  NULL,              /* Use system malloc */
+                  NULL,              /* Use system free */
+                  4096,              /* Arbitrary arena size, which also dictates roughly the size of Key */
+                  NULL,              /* No cache store */
+                  NULL,              /* No cache lookup */
+                  NULL               /* No cache data */
+                  );
 
     /* We use the posix hash table for the header lookups */
     hcreate(KEY_HASH_SIZE);
@@ -163,20 +163,21 @@ main(int argc, const char *argv[])
 
     /* Loop over the remaining arguments, and parse those as if they were Key: headers */
     for (i = 0; i < argc; ++i) {
-        key_params_t params;
+        http_key_params_t params;
         size_t num_params;
         unsigned char arena[8192];
         char buf[8192];
 
-        if (KEY_PARSE_OK == key_parse_buffer((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
-            size_t len = key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
+        if (HTTP_KEY_PARSE_OK ==
+            http_key_parse_buffer((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
+            size_t len = http_key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
 
             if (terse) {
                 printf("%.*s,%d\n", (int)len, buf, (int)len);
             } else {
                 printf("\tKey: %s -> \"%.*s\"\n", argv[i], (int)len, buf);
             }
-            key_release_params(&key, params);
+            http_key_release_params(&key, params);
         } else {
             /* ToDo: Parse failure */
         }

@@ -38,16 +38,16 @@
 #endif
 
 /* Initialize a Key object. This must be called before usage. */
-key_t *
-key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t mem_free, size_t arena_size,
-         key_cache_store_t cache_store, key_cache_lookup_t cache_lookup, void *cache_data)
+http_key_t *
+http_key_init(http_key_t *key, http_key_header_t get_header, http_key_malloc_t mem_alloc, http_key_free_t mem_free,
+              size_t arena_size, http_key_cache_store_t cache_store, http_key_cache_lookup_t cache_lookup, void *cache_data)
 {
-    key_malloc_t allocator = mem_alloc ? mem_alloc : &p_key_malloc;
+    http_key_malloc_t allocator = mem_alloc ? mem_alloc : &key_malloc;
 
     assert(get_header);
 
     if (!key) {
-        if (!(key = (key_t *)allocator(sizeof(key_t)))) {
+        if (!(key = (http_key_t *)allocator(sizeof(http_key_t)))) {
             return NULL;
         }
         key->allocated = 1;
@@ -57,8 +57,8 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t
 
     key->get_header = get_header;
     key->malloc = allocator;
-    key->free = mem_free ? mem_free : &p_key_free;
-    key->arena_size = arena_size >= KEY_MIN_ARENA ? arena_size : KEY_MIN_ARENA;
+    key->free = mem_free ? mem_free : &key_free;
+    key->arena_size = arena_size >= HTTP_KEY_MIN_ARENA ? arena_size : HTTP_KEY_MIN_ARENA;
 
     /* These can all be NULL, i.e. the Key parameter cache is optional */
     if (cache_store || cache_lookup || cache_data) {
@@ -71,14 +71,14 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t
         key->cache.lookup = cache_lookup;
         key->cache.data = cache_data;
     } else {
-        p_key_memset(&key->cache, 0, sizeof(key->cache));
+        key_memset(&key->cache, 0, sizeof(key->cache));
     }
 
     return key;
 }
 
 void
-key_release(key_t *key)
+http_key_release(http_key_t *key)
 {
     if (key && key->allocated) {
         key->free(key);
@@ -86,19 +86,19 @@ key_release(key_t *key)
 }
 
 void
-key_release_params(key_t *key, key_params_t params)
+http_key_release_params(http_key_t *key, http_key_params_t params)
 {
     key_common_t *param = (key_common_t *)params;
 
     assert(key);
     assert(param);
 
-    p_key_arena_destroy(param->arena);
+    key_arena_destroy(param->arena);
 }
 
 /* Main evaluation entry point */
 size_t
-key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size)
+http_key_eval(http_key_t *key, void *header_data, http_key_params_t params, char *buf, size_t buf_size)
 {
     key_common_t *param = (key_common_t *)params;
     size_t pos = 0;

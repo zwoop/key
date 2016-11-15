@@ -33,7 +33,7 @@
 #endif
 
 size_t
-p_key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     const char *token_start = value;
     const char *token_next = NULL;
@@ -56,8 +56,8 @@ p_key_eval_div(key_common_t *param, const char *value, size_t value_len, char *b
            (omitting the modulus).
     */
 
-    if ((token_len = p_key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
-        uint64_t p = p_key_memtoll(token_start, token_len);
+    if ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
+        uint64_t p = key_memtoll(token_start, token_len);
         int ret = snprintf(buf + start, buf_size - start, "%" PRIu64 "", (uint64_t)(p / div->divider));
 
         /* ToDo: This doesn't deal with the buffer being too small, which is an error case */
@@ -69,7 +69,7 @@ p_key_eval_div(key_common_t *param, const char *value, size_t value_len, char *b
 }
 
 size_t
-p_key_eval_partition(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+key_eval_partition(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     const char *token_start = value;
     const char *token_next = NULL;
@@ -96,7 +96,7 @@ p_key_eval_partition(key_common_t *param, const char *value, size_t value_len, c
            2)  Increment "segment_id" by 1.
        8)  Return "segment_id".
     */
-    if ((token_len = p_key_strsep(value, value_len, &token_start, &token_next, ',') > 0)) {
+    if ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',') > 0)) {
     } else {
     }
 
@@ -104,7 +104,7 @@ p_key_eval_partition(key_common_t *param, const char *value, size_t value_len, c
 }
 
 size_t
-p_key_eval_match(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+key_eval_match(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     const char *token_start = value;
     const char *token_next = NULL;
@@ -126,7 +126,7 @@ p_key_eval_match(key_common_t *param, const char *value, size_t value_len, char 
                identical to "parameter_value", return "1".
        4)  Return "0".
     */
-    while ((token_len = p_key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
+    while ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
         if ((token_len == match->match_len) && !memcmp(token_start, match->match, token_len)) {
             *(buf + start) = '1';
             return 1;
@@ -139,7 +139,7 @@ p_key_eval_match(key_common_t *param, const char *value, size_t value_len, char 
 }
 
 size_t
-p_key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     const char *token_start = value;
     const char *token_next = NULL;
@@ -161,7 +161,7 @@ p_key_eval_substr(key_common_t *param, const char *value, size_t value_len, char
                present as a substring of "header_value", return "1".
        4)  Return "0".
     */
-    while ((token_len = p_key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
+    while ((token_len = key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
         if (memmem(token_start, token_len, substr->substr, substr->substr_len)) {
             *(buf + start) = '1';
             return 1;
@@ -174,7 +174,7 @@ p_key_eval_substr(key_common_t *param, const char *value, size_t value_len, char
 }
 
 size_t
-p_key_eval_param(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
+key_eval_param(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size)
 {
     key_param_param_t *substr = (key_param_param_t *)param;
 

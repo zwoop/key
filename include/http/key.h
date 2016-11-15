@@ -32,27 +32,27 @@
 extern "C" {
 #endif
 
-#define KEY_MAX_PARTITIONS 32
-#define KEY_MIN_ARENA 128
+#define HTTP_KEY_MAX_PARTITIONS 32
+#define HTTP_KEY_MIN_ARENA 128
 
 /* Holds one single key parameter "rule", which is opaque in the public APIs. This does hold
    all the information necessary for a single parameter rule, but you must not modify it directly. */
-typedef struct _key_params *key_params_t;
+typedef struct _http_key_params *http_key_params_t;
 
 /**
  * @brief Callback function, for retrieving a header value, managing memory and a lookup cache.
  *
  * Prototype declaration for callback needed to retrieve a header value during evaluation.
  */
-typedef const char *(*key_header_t)(void *, const char *, size_t, size_t *);
+typedef const char *(*http_key_header_t)(void *, const char *, size_t, size_t *);
 
- /**
-  * @brief Callback function, for memory allocation during Key header parsing
-  *
-  * Prototype declaration for callback needed to perform memory allocation. When not explicitly
-  * specified, we default to system malloc().
-  */
-typedef void *(*key_malloc_t)(size_t);
+/**
+ * @brief Callback function, for memory allocation during Key header parsing
+ *
+ * Prototype declaration for callback needed to perform memory allocation. When not explicitly
+ * specified, we default to system malloc().
+ */
+typedef void *(*http_key_malloc_t)(size_t);
 
 /**
  * @brief Callback function, for freeing previously allocate memory
@@ -60,7 +60,7 @@ typedef void *(*key_malloc_t)(size_t);
  * Prototype declaration for callback needed to free memory. When not explicitly
  * specified, we default to system free().
  */
-typedef void (*key_free_t)(void *);
+typedef void (*http_key_free_t)(void *);
 
 /**
  * @brief Callback function, storing a parsed parameter list in a cache
@@ -70,7 +70,7 @@ typedef void (*key_free_t)(void *);
  * are optional to the library, but when used, you must provide both a store and a lookup
  * callback.
  */
-typedef void (*key_cache_store_t)(void *, const char *, size_t, key_params_t);
+typedef void (*http_key_cache_store_t)(void *, const char *, size_t, http_key_params_t);
 
 /**
  * @brief Callback function, looking up a Key in the parameter cache
@@ -78,42 +78,44 @@ typedef void (*key_cache_store_t)(void *, const char *, size_t, key_params_t);
  * Prototype declaration for the (optional) parameter list cache system. This particular
  * callback is used for subsequent lookups against the cache.
  */
-typedef const key_params_t (*key_cache_lookup_t)(void *, const char *, size_t);
+typedef const http_key_params_t (*http_key_cache_lookup_t)(void *, const char *, size_t);
 
 typedef struct {
-    key_header_t get_header;
-    key_malloc_t malloc;
-    key_free_t free;
+    http_key_header_t get_header;
+    http_key_malloc_t malloc;
+    http_key_free_t free;
     size_t arena_size;
 
     /* These are optional */
     struct {
-        key_cache_store_t store;
-        key_cache_lookup_t lookup;
+        http_key_cache_store_t store;
+        http_key_cache_lookup_t lookup;
         void *data;
     } cache;
 
     /* Internal. ToDo: These ought to be opaque ... */
     int allocated : 1;
-} key_t;
+} http_key_t;
 
 typedef enum {
-    KEY_PARSE_OK,
-    KEY_PARSE_ERROR,
-} key_parse_status;
+    HTTP_KEY_PARSE_OK,
+    HTTP_KEY_PARSE_ERROR,
+} http_key_parse_status;
 
 /* Public interfaces */
-key_t *key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t mem_free, size_t arena_size,
-                key_cache_store_t cache_store, key_cache_lookup_t cache_lookup, void *cache_data);
-void key_release(key_t *key);
+http_key_t *http_key_init(http_key_t *key, http_key_header_t get_header, http_key_malloc_t mem_alloc, http_key_free_t mem_free,
+                          size_t arena_size, http_key_cache_store_t cache_store, http_key_cache_lookup_t cache_lookup,
+                          void *cache_data);
+void http_key_release(http_key_t *key);
 
-key_parse_status key_parse(key_t *key, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params);
-key_parse_status key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len,
-                                  key_params_t *params, size_t *num_params);
+http_key_parse_status http_key_parse(http_key_t *key, const char *key_string, size_t key_string_len, http_key_params_t *params,
+                                     size_t *num_params);
+http_key_parse_status http_key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len,
+                                            http_key_params_t *params, size_t *num_params);
 
-size_t key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size);
+size_t http_key_eval(http_key_t *http_key, void *header_data, http_key_params_t params, char *buf, size_t buf_size);
 
-void key_release_params(key_t *key, key_params_t params);
+void http_key_release_params(http_key_t *key, http_key_params_t params);
 
 #ifdef __cplusplus
 }

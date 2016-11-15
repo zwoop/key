@@ -29,9 +29,9 @@
 #include "include/arena.h"
 
 key_arena_t *
-p_key_arena_create(key_t *key, void *buffer, size_t size)
+key_arena_create(http_key_t *key, void *buffer, size_t size)
 {
-    if (buffer && (size >= KEY_MIN_ARENA)) {
+    if (buffer && (size >= HTTP_KEY_MIN_ARENA)) {
         key_arena_t *arena = (key_arena_t *)buffer;
 
         arena->size = size;
@@ -45,7 +45,7 @@ p_key_arena_create(key_t *key, void *buffer, size_t size)
 }
 
 void
-p_key_arena_destroy(key_arena_t *arena)
+key_arena_destroy(key_arena_t *arena)
 {
     assert(arena);
 
@@ -55,7 +55,7 @@ p_key_arena_destroy(key_arena_t *arena)
 }
 
 void *
-p_key_arena_allocate(key_arena_t *arena, size_t size)
+key_arena_allocate(key_arena_t *arena, size_t size)
 {
     if (size <= (arena->pos - arena->size)) {
         void *memory = (void *)((unsigned char *)arena + arena->pos);

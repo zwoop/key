@@ -61,7 +61,7 @@ typedef struct {
 
 typedef struct {
     key_common_t c;
-    uint64_t partitions[KEY_MAX_PARTITIONS]; /* ToDo: Eeep */
+    uint64_t partitions[HTTP_KEY_MAX_PARTITIONS]; /* ToDo: Eeep */
     size_t num_partitions;
 } key_param_partition_t;
 

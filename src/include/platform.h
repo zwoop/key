@@ -26,38 +26,38 @@
 #include "include/key_config.h"
 
 #if HAVE_MEMSET
-#define p_key_memset memset
+#define key_memset memset
 #else
 #error Need memset(), file a ticket for this platform!
 #endif
 
 #if HAVE_MEMCHR
-#define p_key_memchr memchr
+#define key_memchr memchr
 #else
 #error Need memchr(), file a ticket for this platform!
 #endif
 
 #if HAVE_STRCHR
-#define p_key_strchr strchr
+#define key_strchr strchr
 #else
 #error Need strchr(), file a ticket for this platform!
 #endif
 
 #if HAVE_STRDUP
-#define p_key_strdup strdup
+#define key_strdup strdup
 #else
 #error Need strdup(), file a ticket for this platform!
 #endif
 
 #if HAVE_STRNCASECMP
-#define p_key_strncasecmp strncasecmp
+#define key_strncasecmp strncasecmp
 #else
 #error Need strncasecmp(), file a ticket for this platform!
 #endif
 
 #if HAVE_MALLOC
-#define p_key_malloc malloc
-#define p_key_free free
+#define key_malloc malloc
+#define key_free free
 #else
 #error Need malloc(), file a ticket for this platform!
 #endif

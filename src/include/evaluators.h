@@ -25,11 +25,11 @@
 
 #include "include/parameters.h"
 
-size_t p_key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-size_t p_key_eval_partition(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-size_t p_key_eval_match(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-size_t p_key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
-size_t p_key_eval_param(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
+size_t key_eval_div(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
+size_t key_eval_partition(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
+size_t key_eval_match(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
+size_t key_eval_substr(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
+size_t key_eval_param(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
 
 #endif /* EVALUATORS_H */
 
