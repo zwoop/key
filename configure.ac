@@ -60,6 +60,7 @@ AC_PROG_LIBTOOL
 TS_ADDTO(CFLAGS, [-std=c11])
 TS_ADDTO(CFLAGS, [-pedantic])
 TS_ADDTO(CFLAGS, [-Wall])
+TS_ADDTO(CFLAGS, [-D_GNU_SOURCE])
 # TS_ADDTO(CFLAGS, [-Werror])
 
 # Checks for libraries.
