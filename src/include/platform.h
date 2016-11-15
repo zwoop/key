@@ -55,6 +55,13 @@
 #error Need strncasecmp(), file a ticket for this platform!
 #endif
 
+#if HAVE_MALLOC
+#define p_key_malloc malloc
+#define p_key_free free
+#else
+#error Need malloc(), file a ticket for this platform!
+#endif
+
 #endif /* KEY_PLATFORM_H */
 
 /*

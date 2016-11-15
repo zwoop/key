@@ -42,7 +42,7 @@ key_t *
 key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t mem_free, size_t arena_size,
          key_cache_store_t cache_store, key_cache_lookup_t cache_lookup, void *cache_data)
 {
-    key_malloc_t allocator = mem_alloc ? mem_alloc : &malloc;
+    key_malloc_t allocator = mem_alloc ? mem_alloc : &p_key_malloc;
 
     assert(get_header);
 
@@ -57,7 +57,7 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t
 
     key->get_header = get_header;
     key->malloc = allocator;
-    key->free = mem_free ? mem_free : &free;
+    key->free = mem_free ? mem_free : &p_key_free;
     key->arena_size = arena_size >= KEY_MIN_ARENA ? arena_size : KEY_MIN_ARENA;
 
     /* These can all be NULL, i.e. the Key parameter cache is optional */

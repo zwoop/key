@@ -268,7 +268,7 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
 }
 
 /* This is the primary, internal parser, it is not a public interface. */
-key_parse_status
+static key_parse_status
 p_key_parse_arena(key_arena_t *arena, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params)
 {
     const char *comma_start = key_string;
