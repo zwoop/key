@@ -50,6 +50,9 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t
         if (!(key = (key_t *)allocator(sizeof(key_t)))) {
             return NULL;
         }
+        key->allocated = 1;
+    } else {
+        key->allocated = 0;
     }
 
     key->get_header = get_header;
@@ -77,7 +80,7 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t
 void
 key_release(key_t *key)
 {
-    if (key) {
+    if (key && key->allocated) {
         key->free(key);
     }
 }
@@ -88,13 +91,13 @@ key_release_params(key_t *key, key_params_t params)
     key_common_t *param = (key_common_t *)params;
 
     assert(key);
-    assert(params);
+    assert(param);
 
     p_key_arena_destroy(param->arena);
 }
 
 /* Main evaluation entry point */
-int
+size_t
 key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size)
 {
     key_common_t *param = (key_common_t *)params;
@@ -105,13 +108,16 @@ key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t b
         const char *value = key->get_header(header_data, param->header, param->header_len, &val_len);
 
         if (value && (val_len > 0)) {
-            if (pos < buf_size) { /* Room for at least one digit, no need to check those */
-                int len = param->evaluator(param, value, val_len, buf, pos, buf_size); /* Header val can not be NULL */
+            size_t len;
 
+            /* In this case, the header can not be NULL, and we'll assure that there's room for at
+               least one result character in the buffer. Neither of those conditions needs to be
+               checked for in the individual evaluators. */
+
+            if ((pos < buf_size) && ((len = param->evaluator(param, value, val_len, buf, pos, buf_size)) > 0)) {
                 pos += len;
             } else {
-                /* ToDo: Deal with buffer error here */
-                break;
+                return 0; /* Error. We choose to abort the entire evaluation, as per the RFC. */
             }
         } else {
             /* This deals with step 1 in all evaluators; header is not present. */
@@ -119,8 +125,7 @@ key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t b
                 memcpy(buf + pos, "none", 4);
                 pos += 4;
             } else {
-                /* ToDo: Deal with errors? */
-                break;
+                return 0; /* Error. We choose to abort the entire evaluation, as per the RFC. */
             }
         }
         param = param->next;

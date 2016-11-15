@@ -64,6 +64,9 @@ typedef struct {
         key_cache_lookup_t lookup;
         void *data;
     } cache;
+
+    /* Internal. ToDo: These ought to be opaque ... */
+    int allocated : 1;
 } key_t;
 
 typedef enum {
@@ -80,7 +83,7 @@ key_parse_status key_parse(key_t *key, const char *key_string, size_t key_string
 key_parse_status key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len,
                                   key_params_t *params, size_t *num_params);
 
-int key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size);
+size_t key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size);
 
 void key_release_params(key_t *key, key_params_t params);
 

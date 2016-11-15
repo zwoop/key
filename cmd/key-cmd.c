@@ -169,12 +169,12 @@ main(int argc, const char *argv[])
         char buf[8192];
 
         if (KEY_PARSE_OK == key_parse_buffer((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
-            int len = key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
+            size_t len = key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
 
             if (terse) {
-                printf("%.*s,%d\n", len, buf, len);
+                printf("%.*s,%d\n", (int)len, buf, (int)len);
             } else {
-                printf("\tKey: %s -> \"%.*s\"\n", argv[i], len, buf);
+                printf("\tKey: %s -> \"%.*s\"\n", argv[i], (int)len, buf);
             }
             key_release_params(&key, params);
         } else {
