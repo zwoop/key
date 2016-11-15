@@ -2,6 +2,8 @@
 
 * Then look at
 
+     - We need better / more documentation in the http/key.h filem in
+       doxygen format.
      - Support the lookup / store functions for parsed Key object cache
      - Support "" around string values (for the tokenizer)
      - Finish all the parsers

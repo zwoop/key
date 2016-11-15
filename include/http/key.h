@@ -42,14 +42,42 @@ typedef struct _key_params *key_params_t;
 /**
  * @brief Callback function, for retrieving a header value, managing memory and a lookup cache.
  *
- * This is a prototype declaration, for declaring the callback need to retrieve a header value,
- * manage various aspects of memory, as well as the optional parser cache.
+ * Prototype declaration for callback needed to retrieve a header value during evaluation.
  */
 typedef const char *(*key_header_t)(void *, const char *, size_t, size_t *);
+
+ /**
+  * @brief Callback function, for memory allocation during Key header parsing
+  *
+  * Prototype declaration for callback needed to perform memory allocation. When not explicitly
+  * specified, we default to system malloc().
+  */
 typedef void *(*key_malloc_t)(size_t);
+
+/**
+ * @brief Callback function, for freeing previously allocate memory
+ *
+ * Prototype declaration for callback needed to free memory. When not explicitly
+ * specified, we default to system free().
+ */
 typedef void (*key_free_t)(void *);
 
+/**
+ * @brief Callback function, storing a parsed parameter list in a cache
+ *
+ * Prototype declaration for the (optional) parameter list cache system. This is used to
+ * store previously parsed Key headers in e.g. an LRU type structure. The cache stores
+ * are optional to the library, but when used, you must provide both a store and a lookup
+ * callback.
+ */
 typedef void (*key_cache_store_t)(void *, const char *, size_t, key_params_t);
+
+/**
+ * @brief Callback function, looking up a Key in the parameter cache
+ *
+ * Prototype declaration for the (optional) parameter list cache system. This particular
+ * callback is used for subsequent lookups against the cache.
+ */
 typedef const key_params_t (*key_cache_lookup_t)(void *, const char *, size_t);
 
 typedef struct {
