@@ -90,7 +90,7 @@ key_release_params(key_t *key, key_params_t params)
     assert(key);
     assert(params);
 
-    p_key_arena_destroy(key, param->arena);
+    p_key_arena_destroy(param->arena);
 }
 
 /* Main evaluation entry point */

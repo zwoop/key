@@ -165,9 +165,10 @@ main(int argc, const char *argv[])
     for (i = 0; i < argc; ++i) {
         key_params_t params;
         size_t num_params;
+        unsigned char arena[8192];
         char buf[8192];
 
-        if (KEY_PARSE_OK == key_parse(&key, argv[i], strlen(argv[i]), &params, &num_params)) {
+        if (KEY_PARSE_OK == key_parse_buffer((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
             int len = key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
 
             if (terse) {

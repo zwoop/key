@@ -267,16 +267,17 @@ p_key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const
     return NULL; /* Could be memory allocation issue, *or* a bad string, we don't really care. */
 }
 
-/* Main Key parser entry point. */
+/* This is the primary, internal parser, it is not a public interface. */
 key_parse_status
-key_parse_arena(key_t *key, key_arena_t *arena, const char *key_string, size_t key_string_len, key_params_t *params,
-                size_t *num_params)
+p_key_parse_arena(key_arena_t *arena, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params)
 {
     const char *comma_start = key_string;
     const char *comma_next = NULL;
     size_t comma_len;
 
-    assert(key);
+    if (!arena) {
+        return KEY_PARSE_ERROR;
+    }
     *params = NULL; /* Make sure we start with a fresh entry */
 
     while ((comma_len = p_key_strsep(key_string, key_string_len, &comma_start, &comma_next, ',')) > 0) {
@@ -293,7 +294,7 @@ key_parse_arena(key_t *key, key_arena_t *arena, const char *key_string, size_t k
                 header_len = semi_len;
             } else if (NULL == param) {
                 if (!(param = p_key_factory(arena, semi_start, semi_len, header, header_len))) {
-                    p_key_arena_destroy(key, arena);
+                    p_key_arena_destroy(arena);
                     return KEY_PARSE_ERROR;
                 }
                 if (!*params) {
@@ -323,18 +324,25 @@ key_parse_arena(key_t *key, key_arena_t *arena, const char *key_string, size_t k
     return KEY_PARSE_OK;
 }
 
+/* The two main Key parser entry point. */
+key_parse_status
+key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len, key_params_t *params,
+                 size_t *num_params)
+{
+    key_arena_t *arena = p_key_arena_create(NULL, buffer, buffer_size);
+
+    return p_key_parse_arena(arena, key_string, key_string_len, params, num_params);
+}
+
 key_parse_status
 key_parse(key_t *key, const char *key_string, size_t key_string_len, key_params_t *params, size_t *num_params)
 {
     key_arena_t *arena;
 
     assert(key);
+    arena = p_key_arena_create(key, key->malloc(key->arena_size), key->arena_size);
 
-    if (!(arena = p_key_arena_create(key))) {
-        return KEY_PARSE_ERROR;
-    }
-
-    return key_parse_arena(key, arena, key_string, key_string_len, params, num_params);
+    return p_key_parse_arena(arena, key_string, key_string_len, params, num_params);
 }
 
 /*

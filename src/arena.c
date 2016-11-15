@@ -29,30 +29,29 @@
 #include "include/arena.h"
 
 key_arena_t *
-p_key_arena_create(key_t *key)
+p_key_arena_create(key_t *key, void *buffer, size_t size)
 {
-    if (key) {
-        key_arena_t *arena = (key_arena_t *)key->malloc(key->arena_size);
+    if (buffer && (size >= KEY_MIN_ARENA)) {
+        key_arena_t *arena = (key_arena_t *)buffer;
 
-        if (arena) {
-            arena->size = key->arena_size;
-            arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
+        arena->size = size;
+        arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
+        arena->key = key; /* Can be NULL */
 
-            return arena;
-        }
-        return NULL; /* Out of memory, the caller has to decide what to do */
+        return arena;
     }
 
-    assert(!"Must provide a Key object (key_t*) for the Arena");
+    return NULL;
 }
 
 void
-p_key_arena_destroy(key_t *key, key_arena_t *arena)
+p_key_arena_destroy(key_arena_t *arena)
 {
-    assert(key);
     assert(arena);
 
-    key->free(arena);
+    if (arena->key) {
+        arena->key->free(arena);
+    }
 }
 
 void *
