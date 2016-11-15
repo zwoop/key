@@ -58,7 +58,7 @@ p_key_eval_div(key_common_t *param, const char *value, size_t value_len, char *b
 
     if ((token_len = p_key_strsep(value, value_len, &token_start, &token_next, ',')) > 0) {
         uint64_t p = p_key_memtoll(token_start, token_len);
-        int ret = snprintf(buf+start, buf_size - start, "%" PRIu64 "", (uint64_t)(p / div->divider));
+        int ret = snprintf(buf + start, buf_size - start, "%" PRIu64 "", (uint64_t)(p / div->divider));
 
         /* ToDo: This doesn't deal with the buffer being too small, which is an error case */
         return ret;

@@ -28,4 +28,5 @@ library_include_HEADERS = include/http/key.h
 clang-format:
 	clang-format -i include/http/*.h
 	clang-format -i src/include/*.[c,h]
+	clang-format -i src/*.[c,h]
 	clang-format -i cmd/*.[c,h]

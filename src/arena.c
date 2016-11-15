@@ -28,7 +28,7 @@
 
 #include "include/arena.h"
 
-key_arena_t*
+key_arena_t *
 p_key_arena_create(key_t *key)
 {
     if (key) {
@@ -55,11 +55,11 @@ p_key_arena_destroy(key_t *key, key_arena_t *arena)
     key->free(arena);
 }
 
-void*
+void *
 p_key_arena_allocate(key_arena_t *arena, size_t size)
 {
     if (size <= (arena->pos - arena->size)) {
-        void *memory = (void*)((unsigned char*)arena + arena->pos);
+        void *memory = (void *)((unsigned char *)arena + arena->pos);
 
         arena->pos = KEY_ARENA_ALIGN(arena->pos + size);
         return memory;

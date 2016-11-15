@@ -1,7 +1,7 @@
 /** @file
 
     Main entry points for the Key APIs; this implements the public
-    interfaces as exposed via a 
+    interfaces as exposed via a
 
         #include <http/key.h>
 
@@ -45,9 +45,9 @@ key_init(key_t *key, key_header_t get_header, key_malloc_t mem_alloc, key_free_t
     key_malloc_t allocator = mem_alloc ? mem_alloc : &malloc;
 
     assert(get_header);
-    
+
     if (!key) {
-        if (!(key = (key_t*)allocator(sizeof(key_t)))) {
+        if (!(key = (key_t *)allocator(sizeof(key_t)))) {
             return NULL;
         }
     }
@@ -85,7 +85,7 @@ key_release(key_t *key)
 void
 key_release_params(key_t *key, key_params_t params)
 {
-    key_common_t *param = (key_common_t*)params;
+    key_common_t *param = (key_common_t *)params;
 
     assert(key);
     assert(params);
@@ -97,12 +97,12 @@ key_release_params(key_t *key, key_params_t params)
 int
 key_eval(key_t *key, void *header_data, key_params_t params, char *buf, size_t buf_size)
 {
-    key_common_t *param = (key_common_t*)params;
+    key_common_t *param = (key_common_t *)params;
     size_t pos = 0;
 
     while (param) {
         size_t val_len;
-        const char* value = key->get_header(header_data, param->header, param->header_len, &val_len);
+        const char *value = key->get_header(header_data, param->header, param->header_len, &val_len);
 
         if (value && (val_len > 0)) {
             if (pos < buf_size) { /* Room for at least one digit, no need to check those */
