@@ -94,7 +94,7 @@ typedef struct {
     } cache;
 
     /* Internal. ToDo: These ought to be opaque ... */
-    int allocated : 1;
+    unsigned int allocated : 1;
 } http_key_t;
 
 typedef enum {
