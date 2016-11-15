@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 #
-# Test cases for the div parameter
+# Test cases for the SUBSTR parameter
 #
 #  Licensed to the Apache Software Foundation (ASF) under one
 #  or more contributor license agreements.  See the NOTICE file
