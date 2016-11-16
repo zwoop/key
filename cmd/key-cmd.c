@@ -72,7 +72,8 @@ get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 static void
 add_header(const char *h)
 {
-    char *sep = key_strchr(h, ':');
+    char *header = key_strdup(h);
+    char *sep = key_strchr(header, ':');
 
     if (sep) {
         *sep++ = '\0';
@@ -81,12 +82,12 @@ add_header(const char *h)
         }
         if (*sep) {
             ENTRY item;
-            int i;
-            char *header = malloc(strlen(h));
+            char *h = header;
 
             /* Store the header value in all lower-case */
-            for (i=0; i <= strlen(h); ++i) {
-                header[i] = tolower(h[i]);
+            while (*h) {
+                *h = tolower(*h);
+                ++h;
             }
             item.key = header;
             item.data = sep;
@@ -97,6 +98,7 @@ add_header(const char *h)
     }
 
     /* Something went wrong parsing the header */
+    free(header);
     fprintf(stderr, "error: %s is not a valid option to -H\n\n", h);
     help();
 }
