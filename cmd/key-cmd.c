@@ -177,7 +177,7 @@ main(int argc, const char *argv[])
             } else {
                 printf("\tKey: %s -> \"%.*s\"\n", argv[i], (int)len, buf);
             }
-            http_key_release_params(&key, params);
+            http_key_release_params(params);
         } else {
             /* ToDo: Parse failure */
         }

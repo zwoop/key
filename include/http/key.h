@@ -115,7 +115,7 @@ http_key_parse_status http_key_parse_buffer(void *buffer, size_t buffer_size, co
 
 size_t http_key_eval(http_key_t *http_key, void *header_data, http_key_params_t params, char *buf, size_t buf_size);
 
-void http_key_release_params(http_key_t *key, http_key_params_t params);
+void http_key_release_params(http_key_params_t params);
 
 #ifdef __cplusplus
 }

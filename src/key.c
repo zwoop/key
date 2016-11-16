@@ -86,14 +86,13 @@ http_key_release(http_key_t *key)
 }
 
 void
-http_key_release_params(http_key_t *key, http_key_params_t params)
+http_key_release_params(http_key_params_t params)
 {
     key_common_t *param = (key_common_t *)params;
 
-    assert(key);
-    assert(param);
-
-    key_arena_destroy(param->arena);
+    if (param && param->arena && param->arena->key) {
+        key_arena_destroy(param->arena);
+    }
 }
 
 /* Main evaluation entry point */
