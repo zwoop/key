@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #endif
 
-#define HASH_SIZE 8192 /* Arbitrary number of headers */
+#define ARENA_SIZE 8192
 #define HEADERS_TABLE_SIZE 256
 
 /* Produce help text, from command line parsing etc. */
@@ -159,7 +159,7 @@ main(int argc, const char *argv[])
     http_key_init(&key, &get_header, /* Header function */
                   NULL,              /* Use system malloc */
                   NULL,              /* Use system free */
-                  4096,              /* Arbitrary arena size, which also dictates roughly the size of Key */
+                  ARENA_SIZE,        /* Arbitrary arena size, which also dictates roughly the size of Key */
                   NULL,              /* No cache store */
                   NULL,              /* No cache lookup */
                   NULL               /* No cache data */
@@ -205,8 +205,8 @@ main(int argc, const char *argv[])
     for (int i = 0; i < argc; ++i) {
         http_key_params_t params;
         size_t num_params;
-        unsigned char arena[HASH_SIZE];
-        char buf[HASH_SIZE];
+        unsigned char arena[ARENA_SIZE];
+        char buf[ARENA_SIZE];
 
         if (HTTP_KEY_PARSE_OK ==
             http_key_parse_buffer((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
