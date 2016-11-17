@@ -42,8 +42,8 @@
 #include <stdlib.h>
 #endif
 
-#define KEY_HASH_SIZE 8192 /* Arbitrary number of headers */
-#define KEY_HEADER_TABLE_SIZE 256
+#define HASH_SIZE 8192 /* Arbitrary number of headers */
+#define HEADERS_TABLE_SIZE 256
 
 /* Produce help text, from command line parsing etc. */
 static void
@@ -55,24 +55,24 @@ help()
 }
 
 /* Manage our header lookup table */
-typedef struct _key_header {
+typedef struct _http_headers {
     char *header;
     char *value;
     size_t value_len;
-    struct _key_header *next;
-} key_header_t;
+    struct _http_headers *next;
+} http_headers_t;
 
-static key_header_t *header_table[KEY_HEADER_TABLE_SIZE]; /* One entry for each header length */
+static http_headers_t *headers_table[HEADERS_TABLE_SIZE]; /* One entry for each header length */
 
 /* Clear out all the malloced entries / values from the header table */
 static void
-clear_header_table()
+clear_headers_table()
 {
-    for (int i = 0; i < KEY_HEADER_TABLE_SIZE; ++i) {
-        key_header_t *entry = header_table[i];
+    for (int i = 0; i < HEADERS_TABLE_SIZE; ++i) {
+        http_headers_t *entry = headers_table[i];
 
         while (entry) {
-            key_header_t *e = entry;
+            http_headers_t *e = entry;
 
             free(entry->header);
             free(entry->value);
@@ -86,7 +86,7 @@ clear_header_table()
 static const char *
 get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 {
-    key_header_t *slot = header_table[header_len];
+    http_headers_t *slot = headers_table[header_len];
 
     while (slot) {
         if (!strncasecmp(slot->header, header, header_len)) {
@@ -115,18 +115,18 @@ add_header(const char *header_val)
         if (*sep) {
             size_t header_len = strlen(header_val);
 
-            if (header_len < KEY_HEADER_TABLE_SIZE) {
-                key_header_t *entry = malloc(sizeof(key_header_t));
+            if (header_len < HEADERS_TABLE_SIZE) {
+                http_headers_t *entry = malloc(sizeof(http_headers_t));
 
-                memset(entry, 0, sizeof(key_header_t));
+                memset(entry, 0, sizeof(http_headers_t));
                 entry->header = strdup(header_val);
                 entry->value = strdup(sep);
                 entry->value_len = strlen(sep);
 
-                if (!header_table[header_len]) {
-                    header_table[header_len] = entry;
+                if (!headers_table[header_len]) {
+                    headers_table[header_len] = entry;
                 } else {
-                    key_header_t *slot = header_table[header_len];
+                    http_headers_t *slot = headers_table[header_len];
 
                     while (slot->next) {
                         slot = slot->next;
@@ -166,7 +166,7 @@ main(int argc, const char *argv[])
                   );
 
     /* Initialize the header table */
-    memset(header_table, 0, sizeof(header_table));
+    memset(headers_table, 0, sizeof(headers_table));
 
     /* Parse the command line arguments */
     while (1) {
@@ -205,8 +205,8 @@ main(int argc, const char *argv[])
     for (int i = 0; i < argc; ++i) {
         http_key_params_t params;
         size_t num_params;
-        unsigned char arena[8192];
-        char buf[8192];
+        unsigned char arena[HASH_SIZE];
+        char buf[HASH_SIZE];
 
         if (HTTP_KEY_PARSE_OK ==
             http_key_parse_buffer((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
@@ -223,7 +223,7 @@ main(int argc, const char *argv[])
         }
     }
 
-    clear_header_table();
+    clear_headers_table();
 
     return 0;
 }
