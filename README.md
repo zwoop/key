@@ -1,7 +1,7 @@
 # HTTP Key
 
-This is still very much work in progress, please see the *TODO* file for things
-that still needs work on. The current RFC draft is available at
+This is still very much work in progress, please see the *TODO* section below
+for things that still needs work on. The current RFC draft is available at
 
 https://tools.ietf.org/html/draft-ietf-httpbis-key-01
 
