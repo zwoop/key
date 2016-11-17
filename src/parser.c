@@ -160,7 +160,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
 {
     key_common_t *param = NULL;
     /* ToDo: Do we need to deal with WS's around the ='s ? */
-    const char *delim = key_memchr(param_str, '=', param_len);
+    const char *delim = memchr(param_str, '=', param_len);
     size_t type_len, arg_len;
     void *arg;
 
@@ -178,7 +178,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
 
     switch (type_len) {
         case 3: /* DIV */
-            if (!key_strncasecmp(param_str, "div", 3)) {
+            if (!strncasecmp(param_str, "div", 3)) {
                 key_param_div_t *p = (key_param_div_t *)key_arena_allocate(arena, sizeof(key_param_div_t));
 
                 if (p) {
@@ -189,7 +189,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             }
             break;
         case 9: /* PARTITION */
-            if (!key_strncasecmp(param_str, "partition", 9)) {
+            if (!strncasecmp(param_str, "partition", 9)) {
                 key_param_partition_t *p = (key_param_partition_t *)key_arena_allocate(arena, sizeof(key_param_partition_t));
 
                 if (p) {
@@ -202,7 +202,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             switch (*param_str) {
                 case 'm':
                 case 'M':
-                    if (!key_strncasecmp(param_str, "match", 5)) {
+                    if (!strncasecmp(param_str, "match", 5)) {
                         key_param_match_t *p = (key_param_match_t *)key_arena_allocate(arena, sizeof(key_param_match_t));
 
                         if (p) {
@@ -219,7 +219,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
                     break;
                 case 'p':
                 case 'P':
-                    if (!key_strncasecmp(param_str, "param", 5)) {
+                    if (!strncasecmp(param_str, "param", 5)) {
                         key_param_param_t *p = (key_param_param_t *)key_arena_allocate(arena, sizeof(key_param_param_t));
 
                         if (p) {
@@ -231,7 +231,7 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             }
             break;
         case 6: /* SUBSTR */
-            if (!key_strncasecmp(param_str, "substr", 6)) {
+            if (!strncasecmp(param_str, "substr", 6)) {
                 key_param_substr_t *p = (key_param_substr_t *)key_arena_allocate(arena, sizeof(key_param_substr_t));
 
                 if (p) {

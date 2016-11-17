@@ -75,11 +75,7 @@ AC_TYPE_UINT64_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([memset])
-AC_CHECK_FUNCS([memchr])
-AC_CHECK_FUNCS([strchr])
-AC_CHECK_FUNCS([strdup])
-AC_CHECK_FUNCS([strncasecmp])
+AC_CHECK_FUNCS([memchr memset strchr strdup strncasecmp])
 
 # Genereated files
 AC_CONFIG_FILES([Makefile

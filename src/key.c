@@ -47,8 +47,8 @@ http_key_init(http_key_t *key, http_key_header_t get_header, http_key_malloc_t m
 
     /* Setup the mandatory fields */
     key->get_header = get_header;
-    key->malloc = mem_alloc ? mem_alloc : &key_malloc;
-    key->free = mem_free ? mem_free : &key_free;
+    key->malloc = mem_alloc ? mem_alloc : &malloc;
+    key->free = mem_free ? mem_free : &free;
     key->arena_size = arena_size >= HTTP_KEY_MIN_ARENA ? arena_size : HTTP_KEY_MIN_ARENA;
 
     /* These can all be NULL, i.e. the Key parameter cache is optional */
@@ -62,7 +62,7 @@ http_key_init(http_key_t *key, http_key_header_t get_header, http_key_malloc_t m
         key->cache.lookup = cache_lookup;
         key->cache.data = cache_data;
     } else {
-        key_memset(&key->cache, 0, sizeof(key->cache));
+        memset(&key->cache, 0, sizeof(key->cache));
     }
 
     return key;

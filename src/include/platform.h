@@ -25,41 +25,28 @@
 
 #include "include/key_config.h"
 
-#if HAVE_MEMSET
-#define key_memset memset
-#else
+#if !HAVE_MEMSET
 #error Need memset(), file a ticket for this platform!
 #endif
 
-#if HAVE_MEMCHR
-#define key_memchr memchr
-#else
+#if !HAVE_MEMCHR
 #error Need memchr(), file a ticket for this platform!
 #endif
 
-#if HAVE_STRCHR
-#define key_strchr strchr
-#else
+#if !HAVE_STRCHR
 #error Need strchr(), file a ticket for this platform!
 #endif
 
-#if HAVE_STRDUP
-#define key_strdup strdup
-#else
+#if !HAVE_STRDUP
 #error Need strdup(), file a ticket for this platform!
 #endif
 
-#if HAVE_STRNCASECMP
-#define key_strncasecmp strncasecmp
-#else
+#if !HAVE_STRNCASECMP
 #error Need strncasecmp(), file a ticket for this platform!
 #endif
 
-#if HAVE_MALLOC
-#define key_malloc malloc
-#define key_free free
-#else
-#error Need malloc(), file a ticket for this platform!
+#if !HAVE_MALLOC
+#error Need malloc() and free(), file a ticket for this platform!
 #endif
 
 #endif /* KEY_PLATFORM_H */

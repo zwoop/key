@@ -104,7 +104,7 @@ get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 static void
 add_header(const char *header_val)
 {
-    char *sep = key_strchr(header_val, ':');
+    char *sep = strchr(header_val, ':');
 
     if (sep) {
         *sep++ = '\0';
