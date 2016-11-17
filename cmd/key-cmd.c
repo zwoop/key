@@ -208,8 +208,7 @@ main(int argc, const char *argv[])
         unsigned char arena[ARENA_SIZE];
         char buf[ARENA_SIZE];
 
-        if (HTTP_KEY_PARSE_OK ==
-            http_key_parse_buffer((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
+        if (HTTP_KEY_PARSE_OK == http_key_parse((void *)arena, sizeof(arena), argv[i], strlen(argv[i]), &params, &num_params)) {
             size_t len = http_key_eval(&key, NULL, params, buf, sizeof(buf) - 1);
 
             if (terse) {

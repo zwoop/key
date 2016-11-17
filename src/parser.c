@@ -331,23 +331,25 @@ key_parse_arena(key_arena_t *arena, const char *key_string, size_t key_string_le
 
 /* The two main Key parser entry point. */
 http_key_parse_status
-http_key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len, http_key_params_t *params,
-                      size_t *num_params)
+http_key_parse(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len, http_key_params_t *params,
+               size_t *num_params)
 {
-    key_arena_t *arena = key_arena_create(NULL, buffer, buffer_size);
+    key_arena_t *arena;
+
+    assert(buffer);
+    assert(buffer_size > HTTP_KEY_MIN_ARENA);
+
+    arena = key_arena_create(NULL, buffer, buffer_size);
 
     return key_parse_arena(arena, key_string, key_string_len, params, num_params);
 }
 
 http_key_parse_status
-http_key_parse(http_key_t *key, const char *key_string, size_t key_string_len, http_key_params_t *params, size_t *num_params)
+http_key_parse_alloc(http_key_t *key, const char *key_string, size_t key_string_len, http_key_params_t *params, size_t *num_params)
 {
-    key_arena_t *arena;
-
     assert(key);
-    arena = key_arena_create(key, key->malloc(key->arena_size), key->arena_size);
 
-    return key_parse_arena(arena, key_string, key_string_len, params, num_params);
+    return http_key_parse(key->malloc(key->arena_size), key->arena_size, key_string, key_string_len, params, num_params);
 }
 
 /*

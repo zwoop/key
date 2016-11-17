@@ -105,10 +105,10 @@ http_key_t *http_key_init(http_key_t *key, http_key_header_t get_header, http_ke
                           size_t arena_size, http_key_cache_store_t cache_store, http_key_cache_lookup_t cache_lookup,
                           void *cache_data);
 
-http_key_parse_status http_key_parse(http_key_t *key, const char *key_string, size_t key_string_len, http_key_params_t *params,
-                                     size_t *num_params);
-http_key_parse_status http_key_parse_buffer(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len,
-                                            http_key_params_t *params, size_t *num_params);
+http_key_parse_status http_key_parse(void *buffer, size_t buffer_size, const char *key_string, size_t key_string_len,
+                                     http_key_params_t *params, size_t *num_params);
+http_key_parse_status http_key_parse_alloc(http_key_t *key, const char *key_string, size_t key_string_len,
+                                           http_key_params_t *params, size_t *num_params);
 
 size_t http_key_eval(http_key_t *http_key, void *header_data, http_key_params_t params, char *buf, size_t buf_size);
 
