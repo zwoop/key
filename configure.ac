@@ -57,12 +57,6 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 # AC_PROG_RANLIB
 
-TS_ADDTO(CFLAGS, [-std=c11])
-TS_ADDTO(CFLAGS, [-pedantic])
-TS_ADDTO(CFLAGS, [-Wall])
-TS_ADDTO(CPPFLAGS, [-D_GNU_SOURCE])
-# TS_ADDTO(CFLAGS, [-Werror])
-
 # Checks for libraries.
 
 # Checks for header files.
@@ -76,6 +70,10 @@ AC_TYPE_UINT64_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memchr memset strchr strdup strncasecmp])
+
+# Do this later, because otherwise the library and function checks can fail oddly (due to e.g. -Werror)
+TS_ADDTO(CFLAGS, [-std=c11 -pedantic -Werror -Wall])
+TS_ADDTO(CPPFLAGS, [-D_GNU_SOURCE])
 
 # Genereated files
 AC_CONFIG_FILES([Makefile
