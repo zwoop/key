@@ -10,6 +10,16 @@ this for some common platforms can be found at
 
 https://bintray.com/apache/trafficserver/clang-format-tools/2016-04-15
 
+## Testing
+
+There's a simple command line tool that is part of the build. This can be
+run with a simple
+
+    make test
+
+Or, from command line directly
+
+    ./cmd/key-cmd -H "Foo: 12" "Foo;div=3"
 
 ## Code Layout
 
