@@ -1,7 +1,9 @@
 # HTTP Key
 
 This is still very much work in progress, please see the *TODO* file for things
-that still needs work on.
+that still needs work on. The current RFC draft is available at
+
+https://tools.ietf.org/html/draft-ietf-httpbis-key-01
 
 ## Contribution
 
@@ -10,12 +12,12 @@ this for some common platforms can be found at
 
 https://bintray.com/apache/trafficserver/clang-format-tools/2016-04-15
 
-## Testing
+## Testing and running from command line
 
 There's a simple command line tool that is part of the build. This can be
 run with a simple
 
-    make test
+    make check
 
 Or, from command line directly
 
