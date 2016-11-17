@@ -21,6 +21,24 @@ Or, from command line directly
 
     ./cmd/key-cmd -H "Foo: 12" "Foo;div=3"
 
+## TODO items
+
+As mentioned, there's plenty of stuff still not working here.
+
+* First, look for the string "ToDo" in the source, and fix those!
+
+* Then look at
+  * We need better / more documentation in the http/key.h filem in doxygen format.
+  * Support "" around string values (for the tokenizer), including escaped "'s.
+  * Support the lookup / store functions for parsed Key object cache.
+  * Finish the missing parsers.
+    * PARAMETER parser.
+    * PARTITION parser.
+  * Finish the evaluators.
+    * PARAMETER evaluator.
+    * PARTITION evaluator.
+  * The are still some error cases that we might not handle well.
+
 ## Code Layout
 
 The public interface is in include/http/key.h, you would use it with e.g.
