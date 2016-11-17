@@ -5,6 +5,9 @@
     is used as part of regression tests, but can also be useful when
     debugging and testing the Key header properties in general.
 
+    This is not a great example of how to use this library, but it
+    can be useful for testing (including our regression tests).
+
     @section license License
 
     Licensed to the Apache Software Foundation (ASF) under one
@@ -25,7 +28,6 @@
 */
 #include <stdio.h>
 #include <assert.h>
-#include <search.h>
 #include <getopt.h>
 #include <ctype.h>
 
@@ -41,6 +43,7 @@
 #endif
 
 #define KEY_HASH_SIZE 8192 /* Arbitrary number of headers */
+#define KEY_HEADER_TABLE_SIZE 256
 
 /* Produce help text, from command line parsing etc. */
 static void
@@ -51,17 +54,46 @@ help()
     exit(0);
 }
 
+/* Manage our header lookup table */
+typedef struct _key_header {
+    char *header;
+    char *value;
+    size_t value_len;
+    struct _key_header *next;
+} key_header_t;
+
+static key_header_t *header_table[KEY_HEADER_TABLE_SIZE]; /* One entry for each header length */
+
+/* Clear out all the malloced entries / values from the header table */
+static void
+clear_header_table()
+{
+    for (int i = 0; i < KEY_HEADER_TABLE_SIZE; ++i) {
+        key_header_t *entry = header_table[i];
+
+        while (entry) {
+            key_header_t *e = entry;
+
+            free(entry->header);
+            free(entry->value);
+            entry = entry->next;
+            free(e);
+        }
+    }
+}
+
 /* Retrieve a header from the hash, this is not particularly efficient, but it's a demo / test tool. */
 static const char *
 get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 {
-    ENTRY item;
-    ENTRY *found_item;
+    key_header_t *slot = header_table[header_len];
 
-    item.key = (char *)header;
-    if ((found_item = hsearch(item, FIND)) != NULL) {
-        *value_len = strlen((const char *)found_item->data);
-        return (const char *)found_item->data;
+    while (slot) {
+        if (!strncasecmp(slot->header, header, header_len)) {
+            *value_len = slot->value_len;
+            return slot->value;
+        }
+        slot = slot->next;
     }
 
     *value_len = 0;
@@ -70,36 +102,45 @@ get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 }
 
 static void
-add_header(const char *h)
+add_header(const char *header_val)
 {
-    char *header = key_strdup(h);
-    char *sep = key_strchr(header, ':');
+    char *sep = key_strchr(header_val, ':');
 
     if (sep) {
         *sep++ = '\0';
         while (*sep && isspace(*sep)) {
             ++sep;
         }
+
         if (*sep) {
-            ENTRY item;
-            char *h = header;
+            size_t header_len = strlen(header_val);
 
-            /* Store the header value in all lower-case */
-            while (*h) {
-                *h = tolower(*h);
-                ++h;
+            if (header_len < KEY_HEADER_TABLE_SIZE) {
+                key_header_t *entry = malloc(sizeof(key_header_t));
+
+                memset(entry, 0, sizeof(key_header_t));
+                entry->header = strdup(header_val);
+                entry->value = strdup(sep);
+                entry->value_len = strlen(sep);
+
+                if (!header_table[header_len]) {
+                    header_table[header_len] = entry;
+                } else {
+                    key_header_t *slot = header_table[header_len];
+
+                    while (slot->next) {
+                        slot = slot->next;
+                    }
+                    slot->next = entry;
+                }
+
+                return;
             }
-            item.key = header;
-            item.data = sep;
-            (void)hsearch(item, ENTER);
-
-            return;
         }
     }
 
     /* Something went wrong parsing the header */
-    free(header);
-    fprintf(stderr, "error: %s is not a valid option to -H\n\n", h);
+    fprintf(stderr, "error: %s is not a valid option to -H\n\n", header_val);
     help();
 }
 
@@ -125,8 +166,8 @@ main(int argc, const char *argv[])
                   NULL               /* No cache data */
                   );
 
-    /* We use the posix hash table for the header lookups */
-    hcreate(KEY_HASH_SIZE);
+    /* Initialize the header table */
+    memset(header_table, 0, sizeof(header_table));
 
     /* Parse the command line arguments */
     while (1) {
@@ -183,8 +224,7 @@ main(int argc, const char *argv[])
         }
     }
 
-    /* No need to release our Key object, since it's on the stack. */
-    hdestroy(); /* Destroy the posix hash table */
+    clear_header_table();
 
     return 0;
 }
