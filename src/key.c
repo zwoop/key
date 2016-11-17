@@ -42,21 +42,12 @@ http_key_t *
 http_key_init(http_key_t *key, http_key_header_t get_header, http_key_malloc_t mem_alloc, http_key_free_t mem_free,
               size_t arena_size, http_key_cache_store_t cache_store, http_key_cache_lookup_t cache_lookup, void *cache_data)
 {
-    http_key_malloc_t allocator = mem_alloc ? mem_alloc : &key_malloc;
-
     assert(get_header);
-
-    if (!key) {
-        if (!(key = (http_key_t *)allocator(sizeof(http_key_t)))) {
-            return NULL;
-        }
-        key->allocated = 1;
-    } else {
-        key->allocated = 0;
-    }
+    assert(key);
 
     key->get_header = get_header;
-    key->malloc = allocator;
+    key->malloc = mem_alloc ? mem_alloc : &key_malloc;
+    ;
     key->free = mem_free ? mem_free : &key_free;
     key->arena_size = arena_size >= HTTP_KEY_MIN_ARENA ? arena_size : HTTP_KEY_MIN_ARENA;
 
@@ -78,15 +69,7 @@ http_key_init(http_key_t *key, http_key_header_t get_header, http_key_malloc_t m
 }
 
 void
-http_key_release(http_key_t *key)
-{
-    if (key && key->allocated) {
-        key->free(key);
-    }
-}
-
-void
-http_key_release_params(http_key_params_t params)
+http_key_release(http_key_params_t params)
 {
     key_common_t *param = (key_common_t *)params;
 

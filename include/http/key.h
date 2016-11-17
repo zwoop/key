@@ -80,6 +80,7 @@ typedef void (*http_key_cache_store_t)(void *, const char *, size_t, http_key_pa
  */
 typedef const http_key_params_t (*http_key_cache_lookup_t)(void *, const char *, size_t);
 
+/* ToDo: Should this be opaque as well? If so, we need a constructor wrapper for this? */
 typedef struct {
     http_key_header_t get_header;
     http_key_malloc_t malloc;
@@ -92,9 +93,6 @@ typedef struct {
         http_key_cache_lookup_t lookup;
         void *data;
     } cache;
-
-    /* Internal. ToDo: These ought to be opaque ... */
-    unsigned int allocated : 1;
 } http_key_t;
 
 typedef enum {
@@ -106,7 +104,6 @@ typedef enum {
 http_key_t *http_key_init(http_key_t *key, http_key_header_t get_header, http_key_malloc_t mem_alloc, http_key_free_t mem_free,
                           size_t arena_size, http_key_cache_store_t cache_store, http_key_cache_lookup_t cache_lookup,
                           void *cache_data);
-void http_key_release(http_key_t *key);
 
 http_key_parse_status http_key_parse(http_key_t *key, const char *key_string, size_t key_string_len, http_key_params_t *params,
                                      size_t *num_params);
@@ -115,7 +112,7 @@ http_key_parse_status http_key_parse_buffer(void *buffer, size_t buffer_size, co
 
 size_t http_key_eval(http_key_t *http_key, void *header_data, http_key_params_t params, char *buf, size_t buf_size);
 
-void http_key_release_params(http_key_params_t params);
+void http_key_release(http_key_params_t params);
 
 #ifdef __cplusplus
 }

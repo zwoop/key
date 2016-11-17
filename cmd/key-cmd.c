@@ -148,7 +148,6 @@ int
 main(int argc, const char *argv[])
 {
     http_key_t key;
-    int i;
     int terse = 0;
 
     /* getopt() options */
@@ -203,7 +202,7 @@ main(int argc, const char *argv[])
     */
 
     /* Loop over the remaining arguments, and parse those as if they were Key: headers */
-    for (i = 0; i < argc; ++i) {
+    for (int i = 0; i < argc; ++i) {
         http_key_params_t params;
         size_t num_params;
         unsigned char arena[8192];
@@ -218,7 +217,7 @@ main(int argc, const char *argv[])
             } else {
                 printf("\tKey: %s -> \"%.*s\"\n", argv[i], (int)len, buf);
             }
-            http_key_release_params(params);
+            http_key_release(params);
         } else {
             /* ToDo: Parse failure */
         }

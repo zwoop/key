@@ -253,10 +253,11 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
     /* Dup the header string unto the arena */
     if (param) {
         char *hdr = (char *)key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
-        int i;
 
         param->arena = arena;
         if (hdr) {
+            int i;
+
             for (i = 0; i < header_len; ++i) {
                 hdr[i] = tolower(header[i]);
             }
