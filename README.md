@@ -10,9 +10,10 @@ https://tools.ietf.org/html/draft-ietf-httpbis-key-01
 This is an attempt to implement a system agnostic runtime system for the HTTP
 Key specifications. Some of the features includes:
 
-  * Flexible and efficient memory management
-  * The parsed results are cacheable in itself, allowing to reuse the
+  * Flexible and efficient memory management.
+  * The parsed result is cacheable in itself, allowing to reuse the
     evaluation components for commonly used Key headers.
+  * Efficient evaluation of parsed Key headers.
   * TBD
 
 ## Contribution
