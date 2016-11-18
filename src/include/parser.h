@@ -34,14 +34,3 @@ size_t key_strsep(const char *value, size_t value_len, const char **start, const
 uint64_t key_memtoll(const char *str, size_t len);
 
 #endif /* PARSER_H */
-
-/*
-  local variables:
-  mode: C
-  indent-tabs-mode: nil
-  c-basic-offset: 4
-  c-file-offsets: ((statement-block-intro . +)
-  (label . 0)
-  (statement-cont . +))
-  end:
-*/

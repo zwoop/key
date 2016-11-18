@@ -32,14 +32,3 @@ size_t key_eval_substr(key_common_t *param, const char *value, size_t value_len,
 size_t key_eval_param(key_common_t *param, const char *value, size_t value_len, char *buf, size_t start, size_t buf_size);
 
 #endif /* EVALUATORS_H */
-
-/*
-  local variables:
-  mode: C
-  indent-tabs-mode: nil
-  c-basic-offset: 4
-  c-file-offsets: ((statement-block-intro . +)
-  (label . 0)
-  (statement-cont . +))
-  end:
-*/

@@ -122,14 +122,3 @@ http_key_eval(http_key_t *key, void *header_data, http_key_params_t params, char
 
     return pos;
 }
-
-/*
-  local variables:
-  mode: C
-  indent-tabs-mode: nil
-  c-basic-offset: 4
-  c-file-offsets: ((statement-block-intro . +)
-  (label . 0)
-  (statement-cont . +))
-  end:
-*/

@@ -361,14 +361,3 @@ http_key_parse_alloc(http_key_t *key, const char *key_string, size_t key_string_
 
     return http_key_parse(key->malloc(key->arena_size), key->arena_size, key_string, key_string_len, params, num_params);
 }
-
-/*
-  local variables:
-  mode: C
-  indent-tabs-mode: nil
-  c-basic-offset: 4
-  c-file-offsets: ((statement-block-intro . +)
-  (label . 0)
-  (statement-cont . +))
-  end:
-*/
