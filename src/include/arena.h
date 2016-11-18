@@ -34,6 +34,8 @@
 typedef struct {
     size_t size;
     size_t pos;
+    char *last_header;
+    size_t last_header_len;
     http_key_t *key;
 } key_arena_t;
 

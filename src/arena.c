@@ -37,6 +37,8 @@ key_arena_create(http_key_t *key, void *buffer, size_t size)
         arena->size = size;
         arena->pos = KEY_ARENA_ALIGN(sizeof(key_arena_t));
         arena->key = key; /* Can be NULL */
+        arena->last_header = NULL;
+        arena->last_header_len = 0;
 
         return arena;
     }

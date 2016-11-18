@@ -24,6 +24,7 @@
 */
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include "include/evaluators.h"
 
@@ -252,21 +253,30 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
 
     /* Dup the header string unto the arena */
     if (param) {
-        char *hdr = (char *)key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
+        char *hdr = arena->last_header;
 
         param->arena = arena;
-        if (hdr) {
-            int i;
+        if (!hdr || strncasecmp(hdr, header, header_len)) {
+            hdr = (char *)key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
 
-            for (i = 0; i < header_len; ++i) {
-                hdr[i] = tolower(header[i]);
+            if (hdr) {
+                int i;
+
+                for (i = 0; i < header_len; ++i) {
+                    hdr[i] = tolower(header[i]);
+                }
+                hdr[i] = '\0';
+                arena->last_header = hdr;
+                arena->last_header_len = header_len;
+            } else {
+                /* Memory allocation failed, return fast for now: ToDo: Something better? */
+                return NULL;
             }
-            hdr[i] = '\0';
-            param->header = (const char *)hdr;
-            param->header_len = header_len;
-
-            return param; /* We can always cast this back to the right type, based on the parameter type */
         }
+        param->header = hdr;
+        param->header_len = header_len;
+
+        return param;
     }
 
     return NULL; /* Could be memory allocation issue, *or* a bad string, we don't really care. */

@@ -24,6 +24,7 @@
     limitations under the License.
 */
 #include <assert.h>
+#include <stdio.h>
 
 #include "http/key.h"
 #include "include/parameters.h"
@@ -84,10 +85,18 @@ http_key_eval(http_key_t *key, void *header_data, http_key_params_t params, char
 {
     key_common_t *param = (key_common_t *)params;
     size_t pos = 0;
+    const char *last_header = NULL;
+    size_t last_header_len = 0;
+    const char *value = NULL;
+    size_t val_len = 0;
 
     while (param) {
-        size_t val_len;
-        const char *value = key->get_header(header_data, param->header, param->header_len, &val_len);
+
+        if ((last_header_len != param->header_len) || (last_header != param->header)) {
+            value = key->get_header(header_data, param->header, param->header_len, &val_len);
+            last_header = param->header;
+            last_header_len = param->header_len;
+        }
 
         if (value && (val_len > 0)) {
             size_t len;

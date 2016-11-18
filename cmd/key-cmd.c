@@ -88,6 +88,7 @@ get_header(void *data, const char *header, size_t header_len, size_t *value_len)
 {
     http_headers_t *slot = headers_table[header_len];
 
+    printf("Getting header %.*s\n", (int)header_len, header);
     while (slot) {
         if (!strncasecmp(slot->header, header, header_len)) {
             *value_len = slot->value_len;
