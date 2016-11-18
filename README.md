@@ -5,6 +5,16 @@ for things that still needs work on. The current RFC draft is available at
 
 https://tools.ietf.org/html/draft-ietf-httpbis-key-01
 
+## Features
+
+This is an attempt to implement a system agnostic runtime system for the HTTP
+Key specifications. Some of the features includes:
+
+  * Flexible and efficient memory management
+  * The parsed results are cacheable in itself, allowing to reuse the
+    evaluation components for commonly used Key headers.
+  * TBD
+
 ## Contribution
 
 All contributions must be formatted with clang-format v3.9.0. Binaries for
@@ -30,6 +40,7 @@ As mentioned, there's plenty of stuff still not working here.
 * First, look for the string "ToDo" in the source, and fix those!
 
 * Then look at
+  * Add a Dump() function for the parameters list, useful for debugging / introspection.
   * We need better / more documentation in the http/key.h filem in doxygen format.
   * Support "" around string values (for the tokenizer), including escaped "'s.
   * Support the lookup / store functions for parsed Key object cache.
