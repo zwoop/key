@@ -50,3 +50,14 @@
 #endif
 
 #endif /* KEY_PLATFORM_H */
+
+/*
+  local variables:
+  mode: C
+  indent-tabs-mode: nil
+  c-basic-offset: 4
+  c-file-offsets: ((statement-block-intro . +)
+  (label . 0)
+  (statement-cont . +))
+  end:
+*/

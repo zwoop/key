@@ -205,3 +205,14 @@ key_eval_param(key_common_t *param, const char *value, size_t value_len, char *b
 
     return 0;
 }
+
+/*
+  local variables:
+  mode: C
+  indent-tabs-mode: nil
+  c-basic-offset: 4
+  c-file-offsets: ((statement-block-intro . +)
+  (label . 0)
+  (statement-cont . +))
+  end:
+*/
