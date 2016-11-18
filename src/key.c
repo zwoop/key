@@ -91,7 +91,6 @@ http_key_eval(http_key_t *key, void *header_data, http_key_params_t params, char
     size_t val_len = 0;
 
     while (param) {
-
         if ((last_header_len != param->header_len) || (last_header != param->header)) {
             value = key->get_header(header_data, param->header, param->header_len, &val_len);
             last_header = param->header;
@@ -104,7 +103,6 @@ http_key_eval(http_key_t *key, void *header_data, http_key_params_t params, char
             /* In this case, the header can not be NULL, and we'll assure that there's room for at
                least one result character in the buffer. Neither of those conditions needs to be
                checked for in the individual evaluators. */
-
             if ((pos < buf_size) && ((len = param->evaluator(param, value, val_len, buf, pos, buf_size)) > 0)) {
                 pos += len;
             } else {
