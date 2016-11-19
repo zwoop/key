@@ -260,12 +260,10 @@ key_factory(key_arena_t *arena, const char *param_str, size_t param_len, const c
             hdr = (char *)key_arena_allocate(arena, header_len + 1); /* We do NULL terminate this header string */
 
             if (hdr) {
-                int i;
-
-                for (i = 0; i < header_len; ++i) {
+                for (int i = 0; i < header_len; ++i) {
                     hdr[i] = tolower(header[i]);
                 }
-                hdr[i] = '\0';
+                hdr[header_len] = '\0';
                 arena->last_header = hdr;
                 arena->last_header_len = header_len;
             } else {
